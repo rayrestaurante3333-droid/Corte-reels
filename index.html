@@ -6,7 +6,7 @@
 <title>CorteHype · App</title>
 <meta name="description" content="Cole o link da sua live e a IA mostra os momentos que podem viralizar. Grátis.">
 <meta property="og:title" content="CorteHype · Cortes virais com IA — grátis">
-<meta property="og:description" content="Cole o link da sua live e a IA acha os momentos que podem viralizar. 0800. Reels prontos a partir de R$ 8,99 no Pix.">
+<meta property="og:description" content="Cole o link da sua live e a IA acha os momentos que podem viralizar. 0800, sem cartão.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://rayrestaurante3333-droid.github.io/Corte-reels/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -145,7 +145,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         <div class="clip"><span class="sc">85</span><span class="ct">Teoria: o final do GTA 6</span><span class="tm">✂️ 01:45:03 → 01:45:58</span><span class="lg">Será que é isso mesmo? Comenta 👀</span></div>
         <div class="clip"><span class="sc">81</span><span class="ct">Reação ao carro mais caro</span><span class="tm">✂️ 00:08:21 → 00:08:59</span><span class="lg">Quanto você acha que custa? 💸</span></div>
       </div>
-      <p class="muted" style="font-size:13px">Cada corte vem com nota viral de 0 a 100, título, legenda e o minuto exato. Quer pronto para postar? Reels a partir de R$ 8,99 no Pix.</p>
+      <p class="muted" style="font-size:13px">Cada corte vem com nota viral de 0 a 100, título, legenda e o minuto exato. Crie sua conta grátis e teste com o seu vídeo.</p>
     </section>
   </main>
 
@@ -246,7 +246,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         <p class="muted" style="margin:0;font-size:13px">Pagou e não liberou? <a href="mailto:cortehype.app+suporte@gmail.com?subject=Suporte%20CorteHype%20-%20Pagamento" style="color:var(--score)">Fale com o suporte</a></p>
       </div>
     </div>
-    <footer>💚 0800: a IA assiste seu vídeo e mostra os melhores momentos — com nota viral, título e legenda — para você cortar. Está começando agora? Esse empurrão é por nossa conta. Quer tudo pronto? Reels para postar a partir de R$ 8,99 no Pix.<br>Suporte: <a href="mailto:cortehype.app+suporte@gmail.com" style="color:var(--score)">cortehype.app+suporte@gmail.com</a></footer>
+    <footer>💚 0800: a IA assiste seu vídeo e mostra os melhores momentos — com nota viral, título e legenda — para você cortar. Está começando agora? Esse empurrão é por nossa conta. <span class="so-logado hidden">Quer tudo pronto? Reels para postar a partir de R$ 8,99 no Pix.</span><br>Suporte: <a href="mailto:cortehype.app+suporte@gmail.com" style="color:var(--score)">cortehype.app+suporte@gmail.com</a></footer>
   </main>
 </div>
 
@@ -260,7 +260,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   var $ = function (id) { return document.getElementById(id); };
   var user = null, perfil = null, modo = 'entrar', canal = null;
 
-  function ver(v) { ['v-load', 'v-auth', 'v-nova', 'v-app'].forEach(function (id) { $(id).classList.toggle('hidden', id !== v); }); $('sair').classList.toggle('hidden', v !== 'v-app'); }
+  function ver(v) { ['v-load', 'v-auth', 'v-nova', 'v-app'].forEach(function (id) { $(id).classList.toggle('hidden', id !== v); }); $('sair').classList.toggle('hidden', v !== 'v-app'); if (v !== 'v-app') document.querySelectorAll('.so-logado').forEach(function (e) { e.classList.add('hidden'); }); }
   function msg(el, t, tipo) { el.textContent = t || ''; el.className = 'msg' + (tipo ? ' ' + tipo : ''); }
   function traduz(e) {
     var m = (e && e.message) || '';
@@ -334,6 +334,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     $('u-plano').className = 'badge ' + perfil.plano;
     $('u-upgrade').classList.toggle('hidden', perfil.plano === 'agencia' || perfil.plano === 'admin');
     $('admin').classList.toggle('hidden', perfil.plano !== 'admin');
+    document.querySelectorAll('.so-logado').forEach(function (e) { e.classList.remove('hidden'); });
     if (perfil.plano === 'admin') carregarAdmin();
     carregarVideos();
     if (canal) sb.removeChannel(canal);
