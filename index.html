@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CortaViral · App</title>
+<meta name="description" content="Corte vídeos longos em clipes virais com IA.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Albert+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0d12;--panel:#18161f;--line:#2a2733;--ink:#f3f0f7;--muted:#a39fae;--rec:#ff3b5c;--score:#ffb627;--ok:#2ec4b6;
+--display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;--body:"Albert Sans","Segoe UI",Roboto,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);-webkit-font-smoothing:antialiased;min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+h1,h2,h3{font-family:var(--display);text-transform:uppercase;line-height:.95;margin:0}
+p{margin:0}
+.hidden{display:none!important}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-family:var(--display);font-weight:900;font-size:26px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.logo .dot{width:11px;height:11px;border-radius:50%;background:var(--rec);box-shadow:0 0 10px var(--rec);animation:blink 1.4s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 16px/1 var(--body);padding:15px 20px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;text-decoration:none}
+.btn.primary{background:var(--rec);border-color:var(--rec);color:#fff}
+.btn.small{padding:10px 14px;font-size:14px}
+.btn:hover{filter:brightness(1.1)}.btn[disabled]{opacity:.5;cursor:default}
+.btn:focus-visible,input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--score);outline-offset:2px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:14px}
+label{display:grid;gap:6px;font-size:14px;color:var(--muted)}
+input[type=email],input[type=password],input[type=text],input[type=url]{font:500 16px var(--body);color:var(--ink);background:#121017;border:1px solid var(--line);border-radius:10px;padding:14px;width:100%}
+.msg{font-size:14px;min-height:1.2em}.msg.err{color:var(--rec)}.msg.ok{color:var(--ok)}
+.eyebrow{font:500 12px var(--mono);color:var(--score);letter-spacing:.08em;text-transform:uppercase}
+.muted{color:var(--muted)}
+.tabs{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tabs button{font:700 15px var(--body);padding:12px;background:transparent;color:var(--muted);border:0;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--rec);color:#fff}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:14px;padding:0;justify-self:start}
+/* auth */
+.auth{min-height:calc(100vh - 120px);display:grid;align-content:center;gap:22px;max-width:420px;margin:0 auto}
+.auth h1{font-size:clamp(46px,12vw,72px);font-weight:900}.auth h1 em{font-style:normal;color:var(--rec)}
+/* app */
+.plan{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.badge{font:700 12px var(--mono);text-transform:uppercase;letter-spacing:.06em;padding:5px 10px;border-radius:999px;border:1px solid var(--line)}
+.badge.criador{border-color:var(--rec);color:var(--rec)}.badge.agencia{border-color:var(--score);color:var(--score)}
+section{margin-top:28px}
+section > h2{font-size:32px;margin-bottom:12px}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:22px;text-align:center;display:grid;gap:10px;cursor:pointer}
+.drop.over{border-color:var(--score);background:rgba(255,182,39,.06)}
+.drop b{font-family:var(--display);font-size:26px;text-transform:uppercase}
+.progress{height:8px;border-radius:4px;background:#121017;overflow:hidden}.progress div{height:100%;width:0;background:var(--score);transition:width .2s}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.row2{display:grid;grid-template-columns:1fr auto;gap:8px}
+.videos{display:grid;gap:10px}
+.video{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:10px}
+.video .h{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.video .t{font-weight:700;overflow-wrap:anywhere}
+.st{font:700 11px var(--mono);text-transform:uppercase;padding:4px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.st.pronto{border-color:var(--ok);color:var(--ok)}.st.erro{border-color:var(--rec);color:var(--rec)}.st.proc{border-color:var(--score);color:var(--score)}
+.clips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.clip{border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;gap:4px;background:#121017}
+.clip .sc{font:700 22px var(--mono);color:var(--score);font-variant-numeric:tabular-nums}
+.clip .ct{font-weight:700;font-size:14px;line-height:1.25}
+.clip .tm{font:500 11px var(--mono);color:var(--muted)}
+.empty{color:var(--muted);padding:16px;border:1px dashed var(--line);border-radius:12px;text-align:center}
+footer{margin-top:40px;color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo"><span class="dot"></span>CortaViral</div>
+    <button class="btn small hidden" id="sair" type="button">Sair</button>
+  </header>
+
+  <!-- Carregando -->
+  <div id="v-load" class="auth"><p class="muted">Carregando…</p></div>
+
+  <!-- Login / cadastro -->
+  <main id="v-auth" class="auth hidden">
+    <div>
+      <p class="eyebrow">● REC · da live ao reel</p>
+      <h1>Seus <em>cortes</em><br>começam aqui.</h1>
+    </div>
+    <div class="card">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="tab-entrar" aria-selected="true">Entrar</button>
+        <button type="button" role="tab" id="tab-criar" aria-selected="false">Criar conta</button>
+      </div>
+      <form id="f-auth" novalidate style="display:grid;gap:14px">
+        <label id="l-nome" class="hidden">Seu nome <input id="a-nome" type="text" autocomplete="name" maxlength="120"></label>
+        <label>E-mail <input id="a-email" type="email" autocomplete="email" inputmode="email" required></label>
+        <label>Senha <input id="a-senha" type="password" autocomplete="current-password" minlength="6" required></label>
+        <p class="msg" id="a-msg" role="alert"></p>
+        <button class="btn primary" id="a-btn" type="submit">Entrar</button>
+        <button class="link" id="a-esqueci" type="button">Esqueci minha senha</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Nova senha (link de recuperação) -->
+  <main id="v-nova" class="auth hidden">
+    <div class="card">
+      <h2 style="font-size:34px">Nova senha</h2>
+      <form id="f-nova" style="display:grid;gap:14px">
+        <label>Nova senha <input id="n-senha" type="password" autocomplete="new-password" minlength="6" required></label>
+        <p class="msg" id="n-msg" role="alert"></p>
+        <button class="btn primary" type="submit">Salvar senha</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- App -->
+  <main id="v-app" class="hidden">
+    <div class="plan">
+      <div>
+        <p class="muted" style="font-size:14px">Olá, <span id="u-nome"></span></p>
+        <p style="font-weight:700">Seu plano: <span class="badge" id="u-plano">Grátis</span></p>
+      </div>
+      <a class="btn small" id="u-upgrade" href="https://claude.ai/artifact/9YaGGjqiVABHwvVsRSJB1n#planos">Ver planos</a>
+    </div>
+
+    <section>
+      <h2>Novo vídeo</h2>
+      <div class="card">
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher vídeo do celular">
+          <b>Enviar vídeo</b>
+          <span class="muted" style="font-size:14px">MP4, MOV ou WEBM · até 50 MB</span>
+          <input id="file" type="file" accept="video/mp4,video/quicktime,video/webm,video/x-matroska" class="hidden">
+        </div>
+        <div class="progress hidden" id="prog"><div></div></div>
+        <div class="or">ou cole um link</div>
+        <form class="row2" id="f-link">
+          <input id="link" type="url" inputmode="url" placeholder="https://youtube.com/…" aria-label="Link do vídeo">
+          <button class="btn primary small" type="submit">Adicionar</button>
+        </form>
+        <p class="msg" id="up-msg" role="status"></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Seus vídeos</h2>
+      <div class="videos" id="videos"><div class="empty">Carregando…</div></div>
+    </section>
+
+    <footer>A análise com IA (nota viral de 0 a 100) está sendo ativada. Seus vídeos ficam guardados e serão analisados assim que ela estiver no ar.</footer>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function () {
+  var URL_SB = 'https://tredxfypgqswjmvpemkt.supabase.co';
+  var KEY = 'sb_publishable_25C6-sCAB4A-Hotczu6T4g_T5FjsTJW';
+  var LIMITE = { gratis: 1, criador: 20, agencia: 100000 };
+  var sb = supabase.createClient(URL_SB, KEY);
+  var $ = function (id) { return document.getElementById(id); };
+  var user = null, perfil = null, modo = 'entrar', canal = null;
+
+  function ver(v) { ['v-load', 'v-auth', 'v-nova', 'v-app'].forEach(function (id) { $(id).classList.toggle('hidden', id !== v); }); $('sair').classList.toggle('hidden', v !== 'v-app'); }
+  function msg(el, t, tipo) { el.textContent = t || ''; el.className = 'msg' + (tipo ? ' ' + tipo : ''); }
+  function traduz(e) {
+    var m = (e && e.message) || '';
+    if (/Invalid login/i.test(m)) return 'E-mail ou senha incorretos.';
+    if (/Email not confirmed/i.test(m)) return 'Confirme seu e-mail pelo link que enviamos antes de entrar.';
+    if (/already registered/i.test(m)) return 'Esse e-mail já tem conta. Toque em "Entrar".';
+    if (/at least 6/i.test(m)) return 'A senha precisa ter pelo menos 6 caracteres.';
+    if (/rate limit/i.test(m)) return 'Muitas tentativas. Espere alguns minutos e tente de novo.';
+    return 'Algo deu errado. Tente de novo.';
+  }
+
+  // ---------- Login / cadastro ----------
+  function setModo(m) {
+    modo = m;
+    $('tab-entrar').setAttribute('aria-selected', m === 'entrar');
+    $('tab-criar').setAttribute('aria-selected', m === 'criar');
+    $('l-nome').classList.toggle('hidden', m !== 'criar');
+    $('a-btn').textContent = m === 'criar' ? 'Criar conta grátis' : 'Entrar';
+    $('a-senha').autocomplete = m === 'criar' ? 'new-password' : 'current-password';
+    $('a-esqueci').classList.toggle('hidden', m === 'criar');
+    msg($('a-msg'));
+  }
+  $('tab-entrar').onclick = function () { setModo('entrar'); };
+  $('tab-criar').onclick = function () { setModo('criar'); };
+
+  $('f-auth').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var email = $('a-email').value.trim(), senha = $('a-senha').value, btn = $('a-btn');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return msg($('a-msg'), 'Digite um e-mail válido.', 'err');
+    if (senha.length < 6) return msg($('a-msg'), 'A senha precisa ter pelo menos 6 caracteres.', 'err');
+    btn.disabled = true;
+    try {
+      if (modo === 'criar') {
+        var r = await sb.auth.signUp({ email: email, password: senha, options: { data: { full_name: $('a-nome').value.trim() }, emailRedirectTo: location.origin + location.pathname } });
+        if (r.error) throw r.error;
+        if (!r.data.session) msg($('a-msg'), 'Conta criada! Enviamos um link de confirmação para ' + email + '. Abra o e-mail e depois entre aqui.', 'ok');
+      } else {
+        var r2 = await sb.auth.signInWithPassword({ email: email, password: senha });
+        if (r2.error) throw r2.error;
+      }
+    } catch (err) { msg($('a-msg'), traduz(err), 'err'); }
+    btn.disabled = false;
+  });
+
+  $('a-esqueci').onclick = async function () {
+    var email = $('a-email').value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return msg($('a-msg'), 'Digite seu e-mail acima e toque de novo em "Esqueci minha senha".', 'err');
+    var r = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+    msg($('a-msg'), r.error ? traduz(r.error) : 'Se esse e-mail tiver conta, enviamos um link para criar uma nova senha.', r.error ? 'err' : 'ok');
+  };
+
+  $('f-nova').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var s = $('n-senha').value;
+    if (s.length < 6) return msg($('n-msg'), 'A senha precisa ter pelo menos 6 caracteres.', 'err');
+    var r = await sb.auth.updateUser({ password: s });
+    if (r.error) return msg($('n-msg'), traduz(r.error), 'err');
+    abrirApp();
+  });
+
+  $('sair').onclick = function () { sb.auth.signOut(); };
+
+  // ---------- App ----------
+  async function abrirApp() {
+    ver('v-app');
+    var p = await sb.from('perfis').select('*').eq('id', user.id).maybeSingle();
+    perfil = p.data || { plano: 'gratis', nome: '' };
+    $('u-nome').textContent = perfil.nome || user.email;
+    var nomes = { gratis: 'Grátis', criador: 'Criador', agencia: 'Agência' };
+    $('u-plano').textContent = nomes[perfil.plano] || 'Grátis';
+    $('u-plano').className = 'badge ' + perfil.plano;
+    $('u-upgrade').classList.toggle('hidden', perfil.plano === 'agencia');
+    carregarVideos();
+    if (canal) sb.removeChannel(canal);
+    canal = sb.channel('meus-videos')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'videos', filter: 'usuario_id=eq.' + user.id }, carregarVideos)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'clipes', filter: 'usuario_id=eq.' + user.id }, carregarVideos)
+      .subscribe();
+  }
+
+  async function videosDoMes() {
+    var ini = new Date(); ini.setDate(1); ini.setHours(0, 0, 0, 0);
+    var r = await sb.from('videos').select('id', { count: 'exact', head: true }).gte('criado_em', ini.toISOString());
+    return r.count || 0;
+  }
+  async function podeEnviar() {
+    var lim = LIMITE[perfil.plano] || 1, usados = await videosDoMes();
+    if (usados >= lim) { msg($('up-msg'), 'Você já usou os ' + lim + ' vídeo(s) do seu plano este mês. Faça upgrade para enviar mais.', 'err'); return false; }
+    return true;
+  }
+
+  var STATUS = { enviado: ['Na fila', 'proc'], transcrevendo: ['Transcrevendo', 'proc'], analisando: ['Achando virais', 'proc'], pronto: ['Pronto', 'pronto'], erro: ['Erro', 'erro'] };
+  function fmt(s) { s = Math.max(0, Math.round(s || 0)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
+
+  async function carregarVideos() {
+    var r = await sb.from('videos').select('id,titulo,link_origem,status,criado_em,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset)').order('criado_em', { ascending: false });
+    var el = $('videos'); el.innerHTML = '';
+    if (r.error) { el.innerHTML = '<div class="empty">Não foi possível carregar seus vídeos agora.</div>'; return; }
+    if (!r.data.length) { el.innerHTML = '<div class="empty">Você ainda não enviou nenhum vídeo. Envie o primeiro acima!</div>'; return; }
+    r.data.forEach(function (v) {
+      var st = STATUS[v.status] || STATUS.enviado;
+      var box = document.createElement('div'); box.className = 'video';
+      box.innerHTML = '<div class="h"><div><div class="t"></div><div class="muted" style="font-size:13px"></div></div><span class="st ' + st[1] + '"></span></div>';
+      box.querySelector('.t').textContent = v.titulo || v.link_origem || 'Vídeo';
+      box.querySelector('.muted').textContent = new Date(v.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      box.querySelector('.st').textContent = st[0];
+      var clipes = (v.clipes || []).sort(function (a, b) { return (b.nota_viral || 0) - (a.nota_viral || 0); });
+      if (clipes.length) {
+        var g = document.createElement('div'); g.className = 'clips';
+        clipes.forEach(function (c) {
+          var d = document.createElement('div'); d.className = 'clip';
+          d.innerHTML = '<span class="sc"></span><span class="ct"></span><span class="tm"></span>';
+          d.querySelector('.sc').textContent = c.nota_viral != null ? c.nota_viral : '–';
+          d.querySelector('.ct').textContent = c.titulo || 'Clipe';
+          d.querySelector('.tm').textContent = fmt(c.inicio_segundos) + '–' + fmt(c.fim_segundos) + ' · ' + (c.preset || 'tela_cheia').replace('_', ' ');
+          g.appendChild(d);
+        });
+        box.appendChild(g);
+      }
+      el.appendChild(box);
+    });
+  }
+
+  // Upload
+  var drop = $('drop'), file = $('file');
+  drop.onclick = function () { file.click(); };
+  drop.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); file.click(); } };
+  drop.ondragover = function (e) { e.preventDefault(); drop.classList.add('over'); };
+  drop.ondragleave = function () { drop.classList.remove('over'); };
+  drop.ondrop = function (e) { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer.files[0]) enviar(e.dataTransfer.files[0]); };
+  file.onchange = function () { if (file.files[0]) enviar(file.files[0]); file.value = ''; };
+
+  async function enviar(f) {
+    msg($('up-msg'));
+    if (!/^video\//.test(f.type)) return msg($('up-msg'), 'Escolha um arquivo de vídeo.', 'err');
+    if (f.size > 50 * 1024 * 1024) return msg($('up-msg'), 'Esse vídeo passa de 50 MB. Envie um menor ou cole o link do YouTube.', 'err');
+    if (!(await podeEnviar())) return;
+    var prog = $('prog'), bar = prog.firstElementChild; prog.classList.remove('hidden'); bar.style.width = '15%';
+    var ext = (f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '');
+    var caminho = user.id + '/' + Date.now() + '.' + ext;
+    var t = setInterval(function () { var w = parseFloat(bar.style.width); if (w < 85) bar.style.width = (w + 5) + '%'; }, 400);
+    var up = await sb.storage.from('videos').upload(caminho, f, { contentType: f.type });
+    clearInterval(t);
+    if (up.error) { prog.classList.add('hidden'); return msg($('up-msg'), 'Não deu para enviar o vídeo. Tente de novo.', 'err'); }
+    bar.style.width = '100%';
+    var ins = await sb.from('videos').insert({ titulo: f.name.replace(/\.[^.]+$/, ''), caminho_arquivo: caminho });
+    setTimeout(function () { prog.classList.add('hidden'); bar.style.width = '0'; }, 800);
+    if (ins.error) return msg($('up-msg'), 'O vídeo subiu, mas não foi registrado. Tente de novo.', 'err');
+    msg($('up-msg'), 'Vídeo enviado! Ele entrou na fila de análise.', 'ok');
+    carregarVideos();
+  }
+
+  $('f-link').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var l = $('link').value.trim();
+    if (!/^https?:\/\/\S+\.\S+/.test(l)) return msg($('up-msg'), 'Cole um link válido, começando com https://', 'err');
+    if (!(await podeEnviar())) return;
+    var ins = await sb.from('videos').insert({ link_origem: l, titulo: l.replace(/^https?:\/\/(www\.)?/, '').slice(0, 80) });
+    if (ins.error) return msg($('up-msg'), 'Não deu para adicionar o link. Tente de novo.', 'err');
+    $('link').value = ''; msg($('up-msg'), 'Link adicionado! Ele entrou na fila de análise.', 'ok');
+    carregarVideos();
+  });
+
+  // ---------- Sessão ----------
+  sb.auth.onAuthStateChange(function (ev, sess) {
+    if (ev === 'PASSWORD_RECOVERY') { user = sess && sess.user; return ver('v-nova'); }
+    var novo = sess ? sess.user : null;
+    if (novo && (!user || user.id !== novo.id)) { user = novo; abrirApp(); }
+    else if (!novo) { user = null; perfil = null; if (canal) { sb.removeChannel(canal); canal = null; } ver('v-auth'); }
+  });
+  sb.auth.getSession().then(function (r) { if (!r.data.session) ver('v-auth'); });
+})();
+</script>
+</body>
+</html>
