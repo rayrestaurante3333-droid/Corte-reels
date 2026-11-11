@@ -63,6 +63,9 @@ section > h2{font-size:32px;margin-bottom:12px}
 .clip .sc{font:700 22px var(--mono);color:var(--score);font-variant-numeric:tabular-nums}
 .clip .ct{font-weight:700;font-size:14px;line-height:1.25}
 .clip .tm{font:500 11px var(--mono);color:var(--muted)}
+a.clip{color:inherit;text-decoration:none;cursor:pointer}a.clip:active{border-color:var(--score)}
+.clip .lg{font-size:12px;color:var(--muted);line-height:1.3}.clip .go{font:700 11px var(--mono);color:var(--score)}
+.video .t a{color:inherit}
 .empty{color:var(--muted);padding:16px;border:1px dashed var(--line);border-radius:12px;text-align:center}
 footer{margin-top:40px;color:var(--muted);font-size:13px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -257,6 +260,10 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   var STATUS = { enviado: ['Na fila', 'proc'], transcrevendo: ['Transcrevendo', 'proc'], analisando: ['Achando virais', 'proc'], pronto: ['Pronto', 'pronto'], erro: ['Erro', 'erro'] };
   function fmt(s) { s = Math.max(0, Math.round(s || 0)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
 
+  function idYoutube(u) {
+    var m = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/.exec(u || '');
+    return m ? m[1] : null;
+  }
   async function carregarVideos() {
     var r = await sb.from('videos').select('id,titulo,link_origem,status,criado_em,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset)').is('excluido_em', null).order('criado_em', { ascending: false });
     var el = $('videos'); el.innerHTML = '';
@@ -266,15 +273,22 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       var st = STATUS[v.status] || STATUS.enviado;
       var box = document.createElement('div'); box.className = 'video';
       box.innerHTML = '<div class="h"><div><div class="t"></div><div class="muted" style="font-size:13px"></div></div><span class="st ' + st[1] + '"></span></div>';
-      box.querySelector('.t').textContent = (v.titulo || v.link_origem || 'Vídeo').replace(/[?&](is|si|feature)=[^&]*$/, '');
+      var nomeV = (v.titulo || v.link_origem || 'Vídeo').replace(/[?&](is|si|feature)=[^&]*$/, '');
+      if (v.link_origem && /^https?:\/\//.test(v.link_origem)) {
+        var a = document.createElement('a'); a.href = v.link_origem; a.target = '_blank'; a.rel = 'noopener'; a.textContent = nomeV;
+        box.querySelector('.t').appendChild(a);
+      } else box.querySelector('.t').textContent = nomeV;
       box.querySelector('.muted').textContent = new Date(v.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
       box.querySelector('.st').textContent = st[0];
       var clipes = (v.clipes || []).sort(function (a, b) { return (b.nota_viral || 0) - (a.nota_viral || 0); });
       if (clipes.length) {
         var g = document.createElement('div'); g.className = 'clips';
         clipes.forEach(function (c) {
-          var d = document.createElement('div'); d.className = 'clip';
-          d.innerHTML = '<span class="sc"></span><span class="ct"></span><span class="tm"></span>';
+          var yt = idYoutube(v.link_origem);
+          var d = document.createElement(yt ? 'a' : 'div'); d.className = 'clip';
+          if (yt) { d.href = 'https://www.youtube.com/watch?v=' + yt + '&t=' + Math.floor(c.inicio_segundos || 0) + 's'; d.target = '_blank'; d.rel = 'noopener'; }
+          d.innerHTML = '<span class="sc"></span><span class="ct"></span><span class="tm"></span><span class="lg"></span>' + (yt ? '<span class="go">▶ Assistir trecho</span>' : '');
+          d.querySelector('.lg').textContent = c.legenda || '';
           d.querySelector('.sc').textContent = c.nota_viral != null ? c.nota_viral : '–';
           d.querySelector('.ct').textContent = c.titulo || 'Clipe';
           d.querySelector('.tm').textContent = fmt(c.inicio_segundos) + '–' + fmt(c.fim_segundos) + ' · ' + (c.preset || 'tela_cheia').replace('_', ' ');
