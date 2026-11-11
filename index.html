@@ -190,7 +190,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
 (function () {
   var URL_SB = 'https://tredxfypgqswjmvpemkt.supabase.co';
   var KEY = 'sb_publishable_25C6-sCAB4A-Hotczu6T4g_T5FjsTJW';
-  var LIMITE = { gratis: 1, criador: 20, agencia: 100000 };
+  var LIMITE = { gratis: 1, criador: 2, agencia: 4, admin: 100000 };
   var sb = supabase.createClient(URL_SB, KEY);
   var $ = function (id) { return document.getElementById(id); };
   var user = null, perfil = null, modo = 'entrar', canal = null;
@@ -264,10 +264,10 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     var p = await sb.from('perfis').select('*').eq('id', user.id).maybeSingle();
     perfil = p.data || { plano: 'gratis', nome: '' };
     $('u-nome').textContent = perfil.nome ? perfil.nome.toLowerCase().replace(/(^|\s)(\S)/g, function (m, a, b) { return a + b.toUpperCase(); }).replace(/ (De|Da|Do|Dos|Das|E) /g, function (m) { return m.toLowerCase(); }) : user.email;
-    var nomes = { gratis: 'Grátis', criador: 'Criador', agencia: 'Agência' };
+    var nomes = { gratis: 'Grátis', criador: 'Criador', agencia: 'Pro', admin: 'Admin' };
     $('u-plano').textContent = nomes[perfil.plano] || 'Grátis';
     $('u-plano').className = 'badge ' + perfil.plano;
-    $('u-upgrade').classList.toggle('hidden', perfil.plano === 'agencia');
+    $('u-upgrade').classList.toggle('hidden', perfil.plano === 'agencia' || perfil.plano === 'admin');
     carregarVideos();
     if (canal) sb.removeChannel(canal);
     canal = sb.channel('meus-videos')
@@ -285,10 +285,10 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   }
   async function podeEnviar() {
     var lim = LIMITE[perfil.plano] || 1, usados = await videosUsados();
-    if (usados >= lim) { msg($('up-msg'), perfil.plano === 'gratis' || !perfil.plano ? MSG_LIMITE : 'Você já usou os ' + lim + ' vídeos do seu plano este mês. Faça upgrade para enviar mais.', 'err'); return false; }
+    if (usados >= lim) { msg($('up-msg'), perfil.plano === 'gratis' || !perfil.plano ? MSG_LIMITE : 'Você já usou os ' + lim + ' links do seu plano este mês. Faça upgrade para enviar mais.', 'err'); return false; }
     return true;
   }
-  function erroInsert(e, padrao) { return /LIMITE_PLANO/.test(e.message || '') ? MSG_LIMITE : padrao; }
+  function erroInsert(e, padrao) { return /LIMITE_PLANO/.test(e.message || '') ? (perfil.plano === 'gratis' ? MSG_LIMITE : 'Você já usou os links do seu plano este mês. Faça upgrade para enviar mais.') : padrao; }
 
   var STATUS = { enviado: ['Aguardando', 'proc'], transcrevendo: ['Analisando', 'proc'], analisando: ['IA analisando', 'proc'], pronto: ['Pronto', 'pronto'], erro: ['Erro', 'erro'] };
   function fmt(s) { s = Math.max(0, Math.round(s || 0)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }

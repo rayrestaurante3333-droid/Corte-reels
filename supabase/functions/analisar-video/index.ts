@@ -18,7 +18,7 @@ const API = "https://generativelanguage.googleapis.com";
 const KLAP_KEY = Deno.env.get("KLAP_API_KEY") ?? "";
 const KLAP = "https://api.klap.app/v2";
 const MAX_TENTATIVAS = 2;
-const CORTES = { gratis: 3, criador: 10, agencia: 10 } as Record<string, number>;
+const CORTES = { gratis: 3, criador: 5, agencia: 5, admin: 5 } as Record<string, number>;
 const DOWNLOADS_GRATIS = 3;
 
 async function klap(path: string, body?: unknown) {
