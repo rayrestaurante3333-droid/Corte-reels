@@ -226,7 +226,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     ver('v-app');
     var p = await sb.from('perfis').select('*').eq('id', user.id).maybeSingle();
     perfil = p.data || { plano: 'gratis', nome: '' };
-    $('u-nome').textContent = perfil.nome || user.email;
+    $('u-nome').textContent = perfil.nome ? perfil.nome.toLowerCase().replace(/(^|\s)(\S)/g, function (m, a, b) { return a + b.toUpperCase(); }).replace(/ (De|Da|Do|Dos|Das|E) /g, function (m) { return m.toLowerCase(); }) : user.email;
     var nomes = { gratis: 'Grátis', criador: 'Criador', agencia: 'Agência' };
     $('u-plano').textContent = nomes[perfil.plano] || 'Grátis';
     $('u-plano').className = 'badge ' + perfil.plano;
@@ -262,7 +262,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       var st = STATUS[v.status] || STATUS.enviado;
       var box = document.createElement('div'); box.className = 'video';
       box.innerHTML = '<div class="h"><div><div class="t"></div><div class="muted" style="font-size:13px"></div></div><span class="st ' + st[1] + '"></span></div>';
-      box.querySelector('.t').textContent = v.titulo || v.link_origem || 'Vídeo';
+      box.querySelector('.t').textContent = (v.titulo || v.link_origem || 'Vídeo').replace(/[?&](is|si|feature)=[^&]*$/, '');
       box.querySelector('.muted').textContent = new Date(v.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
       box.querySelector('.st').textContent = st[0];
       var clipes = (v.clipes || []).sort(function (a, b) { return (b.nota_viral || 0) - (a.nota_viral || 0); });
@@ -316,7 +316,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     var l = $('link').value.trim();
     if (!/^https?:\/\/\S+\.\S+/.test(l)) return msg($('up-msg'), 'Cole um link válido, começando com https://', 'err');
     if (!(await podeEnviar())) return;
-    var ins = await sb.from('videos').insert({ link_origem: l, titulo: l.replace(/^https?:\/\/(www\.)?/, '').slice(0, 80) });
+    var ins = await sb.from('videos').insert({ link_origem: l, titulo: l.replace(/^https?:\/\/(www\.|m\.)?/, '').replace(/[?&](is|si|feature)=[^&]*/g, '').slice(0, 80) });
     if (ins.error) return msg($('up-msg'), 'Não deu para adicionar o link. Tente de novo.', 'err');
     $('link').value = ''; msg($('up-msg'), 'Link adicionado! Ele entrou na fila de análise.', 'ok');
     carregarVideos();
