@@ -17,6 +17,11 @@ body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);-webkit-fon
 h1,h2,h3{font-family:var(--display);text-transform:uppercase;line-height:.95;margin:0}
 p{margin:0}
 .hidden{display:none!important}
+.direitos{border:1px solid var(--score);border-radius:12px;padding:14px;display:grid;gap:10px;background:#18141c}
+.direitos h3{margin:0;font-size:16px}.direitos p,.direitos li{margin:0;font-size:14px;line-height:1.4}.direitos ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.direitos .fonte{font-weight:700;overflow-wrap:anywhere}.direitos .alerta{color:var(--score)}
+.direitos label{display:flex;gap:10px;align-items:flex-start;font-size:14px;font-weight:700;line-height:1.35}.direitos input[type=checkbox]{width:22px;height:22px;flex:none;margin:0}
+.direitos .acoes{display:flex;gap:8px;flex-wrap:wrap}
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .logo{font-family:var(--display);font-weight:900;font-size:26px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
 .logo .dot{width:11px;height:11px;border-radius:50%;background:var(--rec);box-shadow:0 0 10px var(--rec);animation:blink 1.4s steps(2) infinite}
@@ -140,6 +145,18 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
           <button class="btn primary small" type="submit">Adicionar</button>
         </form>
         <p class="msg" id="up-msg" role="status"></p>
+        <div class="direitos hidden" id="direitos" role="dialog" aria-labelledby="dir-tit">
+          <h3 id="dir-tit">🔎 Verificação de direitos</h3>
+          <p>Vídeo: <span class="fonte" id="dir-fonte"></span></p>
+          <p class="alerta" id="dir-alerta"></p>
+          <ul>
+            <li>Só cortamos vídeos <b>seus</b> ou que o dono <b>autorizou</b>.</li>
+            <li>Não cortamos vídeos de outros canais, filmes, séries, novelas, jogos de futebol ou clipes de música sem autorização.</li>
+            <li>Postar cortes de vídeos de outras pessoas pode derrubar o seu canal.</li>
+          </ul>
+          <label><input type="checkbox" id="dir-ok"> Este vídeo é meu ou tenho autorização do dono para cortar e postar.</label>
+          <div class="acoes"><button class="btn primary small" id="dir-sim" type="button" disabled>Confirmar e enviar</button><button class="btn small" id="dir-nao" type="button">Cancelar</button></div>
+        </div>
       </div>
     </section>
 
@@ -319,11 +336,32 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   drop.ondrop = function (e) { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer.files[0]) enviar(e.dataTransfer.files[0]); };
   file.onchange = function () { if (file.files[0]) enviar(file.files[0]); file.value = ''; };
 
+  async function donoDoLink(l) {
+    try {
+      var c = new AbortController(); setTimeout(function () { c.abort(); }, 5000);
+      var r = await fetch('https://noembed.com/embed?url=' + encodeURIComponent(l), { signal: c.signal });
+      var j = await r.json();
+      return j && !j.error ? { canal: j.author_name || '', titulo: j.title || '' } : null;
+    } catch (e) { return null; }
+  }
+  function confirmarDireitos(fonte, alerta) {
+    return new Promise(function (ok) {
+      var box = $('direitos'), chk = $('dir-ok'), sim = $('dir-sim'), nao = $('dir-nao');
+      $('dir-fonte').textContent = fonte; $('dir-alerta').textContent = alerta || ''; $('dir-alerta').classList.toggle('hidden', !alerta);
+      chk.checked = false; sim.disabled = true; box.classList.remove('hidden'); box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      chk.onchange = function () { sim.disabled = !chk.checked; };
+      function fim(v) { box.classList.add('hidden'); sim.onclick = nao.onclick = null; ok(v); }
+      sim.onclick = function () { fim(true); }; nao.onclick = function () { fim(false); msg($('up-msg'), 'Envio cancelado.', ''); };
+    });
+  }
+  function erroDireitos(e, padrao) { return /DIREITOS/.test(e.message || '') ? 'Confirme que o vídeo é seu ou que você tem autorização.' : erroInsert(e, padrao); }
+
   async function enviar(f) {
     msg($('up-msg'));
     if (!/^video\//.test(f.type)) return msg($('up-msg'), 'Escolha um arquivo de vídeo.', 'err');
     if (f.size > 50 * 1024 * 1024) return msg($('up-msg'), 'Esse vídeo passa de 50 MB. Envie um menor ou cole o link do YouTube.', 'err');
     if (!(await podeEnviar())) return;
+    if (!(await confirmarDireitos(f.name, ''))) return;
     var prog = $('prog'), bar = prog.firstElementChild; prog.classList.remove('hidden'); bar.style.width = '15%';
     var ext = (f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '');
     var caminho = user.id + '/' + Date.now() + '.' + ext;
@@ -332,9 +370,9 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     clearInterval(t);
     if (up.error) { prog.classList.add('hidden'); return msg($('up-msg'), 'Não deu para enviar o vídeo. Tente de novo.', 'err'); }
     bar.style.width = '100%';
-    var ins = await sb.from('videos').insert({ titulo: f.name.replace(/\.[^.]+$/, ''), caminho_arquivo: caminho });
+    var ins = await sb.from('videos').insert({ titulo: f.name.replace(/\.[^.]+$/, ''), caminho_arquivo: caminho, direitos_confirmados: true });
     setTimeout(function () { prog.classList.add('hidden'); bar.style.width = '0'; }, 800);
-    if (ins.error) return msg($('up-msg'), erroInsert(ins.error, 'O vídeo subiu, mas não foi registrado. Tente de novo.'), 'err');
+    if (ins.error) return msg($('up-msg'), erroDireitos(ins.error, 'O vídeo subiu, mas não foi registrado. Tente de novo.'), 'err');
     msg($('up-msg'), 'Vídeo enviado! Ele entrou na fila de análise.', 'ok');
     carregarVideos();
   }
@@ -344,8 +382,15 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     var l = $('link').value.trim();
     if (!/^https?:\/\/\S+\.\S+/.test(l)) return msg($('up-msg'), 'Cole um link válido, começando com https://', 'err');
     if (!(await podeEnviar())) return;
-    var ins = await sb.from('videos').insert({ link_origem: l, titulo: l.replace(/^https?:\/\/(www\.|m\.)?/, '').replace(/[?&](is|si|feature)=[^&]*/g, '').slice(0, 80) });
-    if (ins.error) return msg($('up-msg'), erroInsert(ins.error, 'Não deu para adicionar o link. Tente de novo.'), 'err');
+    msg($('up-msg'), '🔎 Verificando o vídeo…', '');
+    var info = await donoDoLink(l);
+    msg($('up-msg'));
+    var fonte = info ? '“' + info.titulo + '” — canal ' + (info.canal || 'desconhecido') : l;
+    var alerta = info ? 'Este vídeo é do canal “' + (info.canal || 'desconhecido') + '”. Se esse canal não é seu, você precisa da autorização do dono.' : 'Não conseguimos identificar o dono deste vídeo. Confira antes de enviar.';
+    if (!(await confirmarDireitos(fonte, alerta))) return;
+    var tit = info && info.titulo ? info.titulo : l.replace(/^https?:\/\/(www\.|m\.)?/, '').replace(/[?&](is|si|feature)=[^&]*/g, '');
+    var ins = await sb.from('videos').insert({ link_origem: l, titulo: tit.slice(0, 120), canal_origem: info && info.canal ? info.canal.slice(0, 200) : null, direitos_confirmados: true });
+    if (ins.error) return msg($('up-msg'), erroDireitos(ins.error, 'Não deu para adicionar o link. Tente de novo.'), 'err');
     $('link').value = ''; msg($('up-msg'), 'Link adicionado! Ele entrou na fila de análise.', 'ok');
     carregarVideos();
   });
