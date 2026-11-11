@@ -1,4 +1,4 @@
-// CortaViral — pagamento por Pix (Mercado Pago) dos Reels prontos de um vídeo.
+// CorteHype — pagamento por Pix (Mercado Pago) dos Reels prontos de um vídeo.
 // Com login (POST JSON):
 //   { "acao": "criar",  "video_id": "<uuid>", "quantidade": 1|3|5 } -> { pago } ou { pagamento_id, copia_cola, qr_base64, valor, expira_em }
 //   { "acao": "status", "pagamento_id": "<uuid>" }   -> { status: "pendente" | "pago" | "cancelado" }
@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
       headers: { Authorization: `Bearer ${MP_TOKEN}`, "Content-Type": "application/json", "X-Idempotency-Key": pag.id },
       body: JSON.stringify({
         transaction_amount: valor,
-        description: `CortaViral - ${qtd} Reel(s) pronto(s): ${String(v.titulo ?? "video").slice(0, 50)}`,
+        description: `CorteHype - ${qtd} Reel(s) pronto(s): ${String(v.titulo ?? "video").slice(0, 50)}`,
         payment_method_id: "pix",
         payer: { email: u.user.email },
         external_reference: pag.id,

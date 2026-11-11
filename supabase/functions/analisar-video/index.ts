@@ -1,4 +1,4 @@
-// CortaViral — analisa um vídeo com a IA do Google (Gemini) e grava os melhores cortes.
+// CorteHype — analisa um vídeo com a IA do Google (Gemini) e grava os melhores cortes.
 // Ações (POST JSON):
 //   { "acao": "info", "url": "<link do YouTube>" }   -> { canal, titulo }
 //   { "acao": "analisar", "video_id": "<uuid>" }    -> inicia a análise
