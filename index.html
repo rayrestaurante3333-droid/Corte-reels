@@ -55,6 +55,7 @@ section > h2{font-size:32px;margin-bottom:12px}
 .video{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:10px}
 .video .h{display:flex;justify-content:space-between;gap:10px;align-items:start}
 .video .t{font-weight:700;overflow-wrap:anywhere}
+.video .del{background:none;border:0;color:var(--rec);font:600 13px inherit;padding:0;cursor:pointer;justify-self:start;text-decoration:underline}
 .st{font:700 11px var(--mono);text-transform:uppercase;padding:4px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
 .st.pronto{border-color:var(--ok);color:var(--ok)}.st.erro{border-color:var(--rec);color:var(--rec)}.st.proc{border-color:var(--score);color:var(--score)}
 .clips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
@@ -239,22 +240,25 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       .subscribe();
   }
 
-  async function videosDoMes() {
-    var ini = new Date(); ini.setDate(1); ini.setHours(0, 0, 0, 0);
-    var r = await sb.from('videos').select('id', { count: 'exact', head: true }).gte('criado_em', ini.toISOString());
+  var MSG_LIMITE = 'O plano Grátis permite apenas 1 vídeo. Toque em "Ver planos" para enviar mais.';
+  async function videosUsados() {
+    var q = sb.from('videos').select('id', { count: 'exact', head: true });
+    if (perfil.plano !== 'gratis') { var ini = new Date(); ini.setDate(1); ini.setHours(0, 0, 0, 0); q = q.gte('criado_em', ini.toISOString()); }
+    var r = await q;
     return r.count || 0;
   }
   async function podeEnviar() {
-    var lim = LIMITE[perfil.plano] || 1, usados = await videosDoMes();
-    if (usados >= lim) { msg($('up-msg'), 'Você já usou os ' + lim + ' vídeo(s) do seu plano este mês. Faça upgrade para enviar mais.', 'err'); return false; }
+    var lim = LIMITE[perfil.plano] || 1, usados = await videosUsados();
+    if (usados >= lim) { msg($('up-msg'), perfil.plano === 'gratis' || !perfil.plano ? MSG_LIMITE : 'Você já usou os ' + lim + ' vídeos do seu plano este mês. Faça upgrade para enviar mais.', 'err'); return false; }
     return true;
   }
+  function erroInsert(e, padrao) { return /LIMITE_PLANO/.test(e.message || '') ? MSG_LIMITE : padrao; }
 
   var STATUS = { enviado: ['Na fila', 'proc'], transcrevendo: ['Transcrevendo', 'proc'], analisando: ['Achando virais', 'proc'], pronto: ['Pronto', 'pronto'], erro: ['Erro', 'erro'] };
   function fmt(s) { s = Math.max(0, Math.round(s || 0)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
 
   async function carregarVideos() {
-    var r = await sb.from('videos').select('id,titulo,link_origem,status,criado_em,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset)').order('criado_em', { ascending: false });
+    var r = await sb.from('videos').select('id,titulo,link_origem,status,criado_em,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset)').is('excluido_em', null).order('criado_em', { ascending: false });
     var el = $('videos'); el.innerHTML = '';
     if (r.error) { el.innerHTML = '<div class="empty">Não foi possível carregar seus vídeos agora.</div>'; return; }
     if (!r.data.length) { el.innerHTML = '<div class="empty">Você ainda não enviou nenhum vídeo. Envie o primeiro acima!</div>'; return; }
@@ -278,6 +282,16 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         });
         box.appendChild(g);
       }
+      var del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.textContent = 'Excluir vídeo';
+      del.onclick = async function () {
+        var aviso = perfil.plano === 'gratis' ? '\n\nAtenção: no plano Grátis, excluir não libera um novo envio.' : '';
+        if (!confirm('Excluir este vídeo da sua lista?' + aviso)) return;
+        del.disabled = true;
+        var x = await sb.from('videos').update({ excluido_em: new Date().toISOString() }).eq('id', v.id);
+        if (x.error) { del.disabled = false; alert('Não deu para excluir. Tente de novo.'); return; }
+        carregarVideos();
+      };
+      box.appendChild(del);
       el.appendChild(box);
     });
   }
@@ -306,7 +320,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     bar.style.width = '100%';
     var ins = await sb.from('videos').insert({ titulo: f.name.replace(/\.[^.]+$/, ''), caminho_arquivo: caminho });
     setTimeout(function () { prog.classList.add('hidden'); bar.style.width = '0'; }, 800);
-    if (ins.error) return msg($('up-msg'), 'O vídeo subiu, mas não foi registrado. Tente de novo.', 'err');
+    if (ins.error) return msg($('up-msg'), erroInsert(ins.error, 'O vídeo subiu, mas não foi registrado. Tente de novo.'), 'err');
     msg($('up-msg'), 'Vídeo enviado! Ele entrou na fila de análise.', 'ok');
     carregarVideos();
   }
@@ -317,7 +331,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     if (!/^https?:\/\/\S+\.\S+/.test(l)) return msg($('up-msg'), 'Cole um link válido, começando com https://', 'err');
     if (!(await podeEnviar())) return;
     var ins = await sb.from('videos').insert({ link_origem: l, titulo: l.replace(/^https?:\/\/(www\.|m\.)?/, '').replace(/[?&](is|si|feature)=[^&]*/g, '').slice(0, 80) });
-    if (ins.error) return msg($('up-msg'), 'Não deu para adicionar o link. Tente de novo.', 'err');
+    if (ins.error) return msg($('up-msg'), erroInsert(ins.error, 'Não deu para adicionar o link. Tente de novo.'), 'err');
     $('link').value = ''; msg($('up-msg'), 'Link adicionado! Ele entrou na fila de análise.', 'ok');
     carregarVideos();
   });
