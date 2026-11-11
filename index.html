@@ -211,7 +211,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         <p class="aviso" id="pix-st" role="status"></p>
       </div>
     </div>
-    <footer>💚 0800: a IA assiste seu vídeo e mostra os melhores momentos — com nota viral, título e legenda — para você cortar. Está começando agora? Esse empurrão é por nossa conta. Quer tudo pronto? Reels para postar a partir de R$ 8,99 no Pix.</footer>
+    <footer>💚 0800: a IA assiste seu vídeo e mostra os melhores momentos — com nota viral, título e legenda — para você cortar. Está começando agora? Esse empurrão é por nossa conta. Quer tudo pronto? Reels para postar a partir de R$ 8,99 no Pix.<br>Suporte: <a href="mailto:cortehype.app@gmail.com" style="color:var(--score)">cortehype.app@gmail.com</a></footer>
   </main>
 </div>
 
@@ -519,7 +519,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
           bt.onclick = function () { pedirReels(v, bt); };
           oferta.appendChild(bt); box.appendChild(oferta);
         } else if (ks === 'erro') {
-          var e2 = document.createElement('p'); e2.className = 'aviso err'; e2.textContent = 'Não conseguimos gerar os Reels deste vídeo. Fale com o suporte para receber seu dinheiro de volta.'; box.appendChild(e2);
+          var e2 = document.createElement('p'); e2.className = 'aviso err'; e2.textContent = 'Não conseguimos gerar os Reels deste vídeo. Escreva para cortehype.app@gmail.com para receber seu dinheiro de volta.'; box.appendChild(e2);
         } else if (ks !== 'pronto') {
           var e3 = document.createElement('p'); e3.className = 'aviso'; e3.textContent = '🎬 Seus ' + (v.reels_qtd || '') + ' Reels prontos estão sendo feitos. Leva de 3 a 10 minutos — você pode sair e voltar depois.'; box.appendChild(e3);
         }
