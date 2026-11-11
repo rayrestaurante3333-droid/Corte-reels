@@ -69,7 +69,13 @@ section > h2{font-size:32px;margin-bottom:12px}
 .clip .ct{font-weight:700;font-size:14px;line-height:1.25}
 .clip .tm{font:500 11px var(--mono);color:var(--muted)}
 button.clip{color:inherit;font:inherit;text-align:left;cursor:pointer;width:100%}button.clip:active{border-color:var(--score)}
-.aviso{margin:0;font-size:14px;line-height:1.4;color:var(--muted)}.aviso.err{color:var(--rec)}
+.sec{margin:4px 0 0;font-size:13px;font-weight:700;color:var(--muted)}
+.oferta{border:1px solid var(--score);border-radius:12px;padding:12px;display:grid;gap:8px;background:#18141c;font-size:14px;line-height:1.4}
+.clip.reel{border-color:var(--score)}
+.aviso{margin:0;font-size:14px;line-height:1.4;color:var(--muted)}.aviso.err{color:var(--rec)}.aviso.ok{color:var(--ok)}
+.pix-qr{width:220px;height:220px;margin:0 auto;display:block;background:#fff;border-radius:10px;padding:8px}
+.pix-cc{width:100%;font:12px var(--mono);background:#121017;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;resize:none}
+.pix-valor{font:700 28px var(--mono);color:var(--score);text-align:center}
 .player{position:fixed;inset:0;background:rgba(5,4,8,.92);z-index:50;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:16px}
 .player .in{width:100%;max-width:480px;display:grid;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
 .player .area.vertical{aspect-ratio:9/16;max-height:70vh;margin:0 auto;width:auto}.player .area{aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden}.player .area iframe,.player .area video{width:100%;height:100%;border:0;display:block}
@@ -97,6 +103,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     <div>
       <p class="eyebrow">● REC · da live ao reel</p>
       <h1>Seus <em>cortes</em><br>começam aqui.</h1>
+      <p class="muted" style="font-size:16px;line-height:1.5;margin:12px 0 0">Cole o link da sua live ou vídeo e a IA mostra os momentos que podem viralizar — <b style="color:var(--ink)">de graça, 0800</b>. Sem cartão, sem pegadinha. 🚀</p>
     </div>
     <div class="card">
       <div class="tabs" role="tablist">
@@ -181,7 +188,27 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         <button class="btn small" type="button" id="pl-copiar">Copiar legenda</button>
       </div>
     </div>
-    <footer>A IA assiste seu vídeo e escolhe os melhores cortes com nota viral de 0 a 100, título e legenda prontos — em 1 a 3 minutos.</footer>
+    <div class="player hidden" id="qtd" role="dialog" aria-modal="true" aria-labelledby="qtd-h">
+      <div class="in">
+        <div class="top"><h3 id="qtd-h">Quantos Reels prontos você quer?</h3><button class="btn small" type="button" id="qtd-fechar">Fechar</button></div>
+        <p class="muted" style="margin:0;font-size:14px">A IA escolhe os melhores momentos do vídeo e entrega cada Reel em pé, com legenda animada, pronto para postar.</p>
+        <button class="btn small" type="button" data-q="1">1 Reel · R$ 8,99</button>
+        <button class="btn primary small" type="button" data-q="3">3 Reels · R$ 26,97</button>
+        <button class="btn small" type="button" data-q="5">5 Reels · R$ 44,95</button>
+      </div>
+    </div>
+    <div class="player hidden" id="pix" role="dialog" aria-modal="true" aria-labelledby="pix-h">
+      <div class="in">
+        <div class="top"><div><h3 id="pix-h">Pague com Pix para baixar</h3><div class="muted" id="pix-tit" style="font-size:13px"></div></div><button class="btn small" type="button" id="pix-fechar">Fechar</button></div>
+        <div class="pix-valor" id="pix-valor"></div>
+        <img class="pix-qr" id="pix-qr" alt="QR Code do Pix">
+        <p class="muted" style="margin:0;font-size:14px">Pague pelo app do seu banco: escaneie o QR Code ou use o <b>Pix copia e cola</b>.</p>
+        <textarea class="pix-cc" id="pix-cc" rows="3" readonly aria-label="Código Pix copia e cola"></textarea>
+        <button class="btn primary small" type="button" id="pix-copiar">Copiar código Pix</button>
+        <p class="aviso" id="pix-st" role="status"></p>
+      </div>
+    </div>
+    <footer>💚 0800: a IA assiste seu vídeo e mostra os melhores momentos — com nota viral, título e legenda — para você cortar. Está começando agora? Esse empurrão é por nossa conta. Quer tudo pronto? Reels para postar a partir de R$ 8,99 no Pix.</footer>
   </main>
 </div>
 
@@ -297,14 +324,68 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     var m = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/.exec(u || '');
     return m ? m[1] : null;
   }
-  async function chamarIA(corpo) {
-    var r = await sb.functions.invoke('analisar-video', { body: corpo });
+  async function chamarFn(nome, corpo, padrao) {
+    var r = await sb.functions.invoke(nome, { body: corpo });
     if (r.error) {
-      var m = 'Não foi possível falar com a IA agora.';
-      try { var j = await r.error.context.json(); if (j && j.erro) m = j.erro; } catch (e) {}
-      return { erro: m };
+      var j = null;
+      try { j = await r.error.context.json(); } catch (e) {}
+      if (j && j.pagar) return j;
+      return { erro: (j && j.erro) || padrao };
     }
     return r.data || {};
+  }
+  function chamarIA(corpo) { return chamarFn('analisar-video', corpo, 'Não foi possível falar com a IA agora.'); }
+  var pixTimer = null;
+  var PRECO_REEL = 8.99;
+  function reais(n) { return 'R$ ' + n.toFixed(2).replace('.', ','); }
+  function escolherQtd() {
+    return new Promise(function (ok) {
+      var box = $('qtd'); box.classList.remove('hidden'); document.body.style.overflow = 'hidden';
+      var fim = function (q) { box.classList.add('hidden'); document.body.style.overflow = ''; ok(q); };
+      box.querySelectorAll('[data-q]').forEach(function (b) { b.onclick = function () { fim(Number(b.getAttribute('data-q'))); }; });
+      $('qtd-fechar').onclick = function () { fim(0); };
+    });
+  }
+  async function pedirReels(v, btn) {
+    btn.disabled = true;
+    var r = await chamarIA({ acao: 'reels', video_id: v.id });
+    if (r.pagar) {
+      var q = await escolherQtd();
+      if (!q) { btn.disabled = false; return; }
+      var pago = await pagarPix(v, q);
+      if (!pago) { btn.disabled = false; return; }
+      await chamarIA({ acao: 'verificar', video_id: v.id });
+    } else if (r.erro) { alert(r.erro); btn.disabled = false; return; }
+    else await chamarIA({ acao: 'verificar', video_id: v.id });
+    carregarVideos();
+  }
+  function fecharPix() { clearTimeout(pixTimer); $('pix').classList.add('hidden'); document.body.style.overflow = ''; }
+  async function pagarPix(v, qtd) {
+    var c = { titulo: qtd + (qtd > 1 ? ' Reels prontos' : ' Reel pronto') + ' · ' + (v.titulo || 'vídeo') };
+    var valor = PRECO_REEL * qtd;
+    var r = await chamarFn('pix', { acao: 'criar', video_id: v.id, quantidade: qtd }, 'Não foi possível gerar o Pix agora.');
+    if (r.erro) { alert(r.erro); return false; }
+    if (r.pago) return true;
+    return new Promise(function (ok) {
+      var v = Number(r.valor || valor || 8.99).toFixed(2).replace('.', ',');
+      $('pix-valor').textContent = 'R$ ' + v;
+      $('pix-tit').textContent = c.titulo || 'Reel';
+      $('pix-qr').src = r.qr_base64 ? 'data:image/png;base64,' + r.qr_base64 : '';
+      $('pix-qr').classList.toggle('hidden', !r.qr_base64);
+      $('pix-cc').value = r.copia_cola || '';
+      $('pix-st').textContent = '⏳ Aguardando o pagamento…'; $('pix-st').className = 'aviso';
+      $('pix').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+      $('pix-copiar').onclick = function () { copiar(r.copia_cola || '', $('pix-copiar')); };
+      var fim = function (pago) { fecharPix(); ok(pago); };
+      $('pix-fechar').onclick = function () { fim(false); };
+      var checar = async function () {
+        var s = await chamarFn('pix', { acao: 'status', pagamento_id: r.pagamento_id }, '');
+        if (s.status === 'pago') { $('pix-st').textContent = '✅ Pagamento confirmado! Gerando seu Reel…'; $('pix-st').className = 'aviso ok'; setTimeout(function () { fim(true); }, 1200); return; }
+        if (s.status === 'cancelado') { $('pix-st').textContent = 'Este Pix expirou. Feche e toque de novo para gerar outro.'; $('pix-st').className = 'aviso err'; return; }
+        if (!$('pix').classList.contains('hidden')) pixTimer = setTimeout(checar, 4000);
+      };
+      pixTimer = setTimeout(checar, 4000);
+    });
   }
   async function analisarVideo(id) {
     var r = await chamarIA({ acao: 'analisar', video_id: id });
@@ -378,9 +459,9 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     return null;
   }
   async function carregarVideos() {
-    var r = await sb.from('videos').select('id,titulo,link_origem,caminho_arquivo,canal_origem,status,erro_detalhe,criado_em,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset,legenda,hashtags,motivo,klap_project_id,video_url)').is('excluido_em', null).order('criado_em', { ascending: false });
+    var r = await sb.from('videos').select('id,titulo,link_origem,caminho_arquivo,canal_origem,status,erro_detalhe,criado_em,klap_status,reels_qtd,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset,legenda,hashtags,motivo,klap_project_id,video_url,origem)').is('excluido_em', null).order('criado_em', { ascending: false });
     var el = $('videos'); el.innerHTML = '';
-    if (!r.error) vigiar(r.data.filter(function (v) { return v.status === 'analisando'; }).map(function (v) { return v.id; }));
+    if (!r.error) vigiar(r.data.filter(function (v) { return v.status === 'analisando' || ['pago', 'iniciando', 'gerando'].indexOf(v.klap_status) >= 0; }).map(function (v) { return v.id; }));
     if (r.error) { el.innerHTML = '<div class="empty">Não foi possível carregar seus vídeos agora.</div>'; return; }
     if (!r.data.length) { el.innerHTML = '<div class="empty">Você ainda não enviou nenhum vídeo. Envie o primeiro acima!</div>'; return; }
     r.data.forEach(function (v) {
@@ -405,22 +486,42 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         go.onclick = function () { go.disabled = true; go.textContent = 'Iniciando…'; analisarVideo(v.id); };
         box.appendChild(go);
       }
-      var clipes = (v.clipes || []).sort(function (a, b) { return (b.nota_viral || 0) - (a.nota_viral || 0); });
-      if (clipes.length) {
+      var todos = (v.clipes || []).sort(function (a, b) { return (b.nota_viral || 0) - (a.nota_viral || 0); });
+      var ideias = todos.filter(function (c) { return c.origem !== 'reel'; });
+      var reels = todos.filter(function (c) { return c.origem === 'reel'; });
+      var montar = function (lista, tituloSec, reel) {
+        if (!lista.length) return;
+        var h = document.createElement('p'); h.className = 'sec'; h.textContent = tituloSec; box.appendChild(h);
         var g = document.createElement('div'); g.className = 'clips';
-        clipes.forEach(function (c) {
-          var d = document.createElement('button'); d.type = 'button'; d.className = 'clip';
-          d.innerHTML = '<span class="sc"></span><span class="ct"></span><span class="tm"></span><span class="lg"></span><span class="go">▶ Assistir corte</span>';
+        lista.forEach(function (c) {
+          var d = document.createElement('button'); d.type = 'button'; d.className = 'clip' + (reel ? ' reel' : '');
+          d.innerHTML = '<span class="sc"></span><span class="ct"></span><span class="tm"></span><span class="lg"></span><span class="go"></span>';
           d.querySelector('.lg').textContent = c.legenda || '';
           d.querySelector('.sc').textContent = c.nota_viral != null ? c.nota_viral : '–';
           d.querySelector('.ct').textContent = c.titulo || 'Clipe';
-          d.querySelector('.tm').textContent = c.fim_segundos ? fmt(c.inicio_segundos) + '–' + fmt(c.fim_segundos) : 'Reel pronto · 9:16 com legenda';
-          if (c.klap_project_id) d.querySelector('.go').textContent = c.video_url ? '▶ Ver e baixar Reel' : '⬇ Gerar Reel pronto';
+          d.querySelector('.tm').textContent = reel ? 'Reel pronto · 9:16 com legenda' : '✂️ Corte manual: ' + fmt(c.inicio_segundos) + ' → ' + fmt(c.fim_segundos);
+          d.querySelector('.go').textContent = reel ? (c.video_url ? '▶ Ver e baixar Reel' : '⬇ Baixar Reel pronto') : '▶ Assistir trecho';
           d.onclick = function () { tocar(v, c, d.querySelector('.go')); };
           g.appendChild(d);
         });
         box.appendChild(g);
+      };
+      montar(ideias, '💡 Melhores momentos (grátis) — corte você mesmo no CapCut usando os minutos', false);
+      if (idYoutube(v.link_origem) && v.status === 'pronto') {
+        var ks = v.klap_status;
+        if (!ks) {
+          var oferta = document.createElement('div'); oferta.className = 'oferta';
+          oferta.innerHTML = '<b>🎬 Quer os Reels prontos para postar?</b><span>Em pé (9:16), com legenda animada, prontos para Instagram, TikTok e Shorts. A partir de ' + reais(PRECO_REEL) + ' por Reel no Pix.</span>';
+          var bt = document.createElement('button'); bt.type = 'button'; bt.className = 'btn primary small'; bt.textContent = 'Quero Reels prontos';
+          bt.onclick = function () { pedirReels(v, bt); };
+          oferta.appendChild(bt); box.appendChild(oferta);
+        } else if (ks === 'erro') {
+          var e2 = document.createElement('p'); e2.className = 'aviso err'; e2.textContent = 'Não conseguimos gerar os Reels deste vídeo. Fale com o suporte para receber seu dinheiro de volta.'; box.appendChild(e2);
+        } else if (ks !== 'pronto') {
+          var e3 = document.createElement('p'); e3.className = 'aviso'; e3.textContent = '🎬 Seus ' + (v.reels_qtd || '') + ' Reels prontos estão sendo feitos. Leva de 3 a 10 minutos — você pode sair e voltar depois.'; box.appendChild(e3);
+        }
       }
+      montar(reels, '🎬 Seus Reels prontos para postar', true);
       var del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.textContent = 'Excluir vídeo';
       del.onclick = async function () {
         var aviso = perfil.plano === 'gratis' ? '\n\nAtenção: no plano Grátis, excluir não libera um novo envio.' : '';

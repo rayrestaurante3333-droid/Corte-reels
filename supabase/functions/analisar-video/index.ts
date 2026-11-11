@@ -2,9 +2,10 @@
 // Ações (POST JSON):
 //   { "acao": "info", "url": "<link do YouTube>" }   -> { canal, titulo }
 //   { "acao": "analisar", "video_id": "<uuid>" }    -> inicia a análise
-//   { "acao": "verificar", "video_id": "<uuid>" }   -> atualiza o andamento (Klap)
-//   { "acao": "baixar", "clipe_id": "<uuid>" }      -> gera/retorna o MP4 pronto do corte (Klap)
-// Com KLAP_API_KEY configurada, links do YouTube viram Reels prontos (Klap). Sem ela, usa só o Gemini.
+//   { "acao": "reels", "video_id": "<uuid>" }       -> planos pagos: pede os Reels prontos (Klap). Grátis -> { pagar }
+//   { "acao": "verificar", "video_id": "<uuid>" }   -> atualiza o andamento dos Reels prontos (Klap)
+//   { "acao": "baixar", "clipe_id": "<uuid>" }      -> gera/retorna o MP4 de um Reel pronto
+// Análise (ideias de corte) = Gemini, de graça. Reels prontos = Klap, só depois de pagos (Pix) ou no plano pago.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -18,8 +19,8 @@ const API = "https://generativelanguage.googleapis.com";
 const KLAP_KEY = Deno.env.get("KLAP_API_KEY") ?? "";
 const KLAP = "https://api.klap.app/v2";
 const MAX_TENTATIVAS = 2;
-const CORTES = { gratis: 3, criador: 5, agencia: 5, admin: 5 } as Record<string, number>;
-const DOWNLOADS_GRATIS = 3;
+const REELS_PLANO = 5; // Reels prontos por link nos planos pagos
+const PRECO_REEL = Number(Deno.env.get("PRECO_REEL") ?? "8.99");
 
 async function klap(path: string, body?: unknown) {
   const r = await fetch(KLAP + path, {
@@ -196,7 +197,7 @@ async function analisar(admin: ReturnType<typeof createClient>, v: Record<string
     const clipes = limpaClipes(res?.clipes);
     if (!clipes.length) throw new Error("A IA não encontrou trechos bons neste vídeo");
 
-    await admin.from("clipes").delete().eq("video_id", v.id);
+    await admin.from("clipes").delete().eq("video_id", v.id).eq("origem", "ia");
     const ins = await admin.from("clipes").insert(clipes.map((c) => ({ ...c, video_id: v.id, usuario_id: v.usuario_id })));
     if (ins.error) throw new Error("Erro ao salvar os cortes: " + ins.error.message);
     await admin.from("videos").update({ status: "pronto", erro_detalhe: null, analisado_em: new Date().toISOString() }).eq("id", v.id);
@@ -233,8 +234,7 @@ Deno.serve(async (req) => {
 
   if (body.acao === "analisar") {
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
-    const usaKlap = !!KLAP_KEY;
-    if (!usaKlap && !GEMINI_KEY) return json({ erro: "A análise automática ainda não foi configurada." }, 503);
+    if (!GEMINI_KEY) return json({ erro: "A análise automática ainda não foi configurada." }, 503);
     // trava: só pega vídeo do próprio usuário, que esteja na fila ou com erro, e marca como "analisando"
     const { data: v, error } = await admin.from("videos")
       .update({ status: "analisando", erro_detalhe: null })
@@ -253,60 +253,71 @@ Deno.serve(async (req) => {
       const info = await infoYoutube(v.link_origem).catch(() => null);
       if (info?.canal) await admin.from("videos").update({ canal_origem: info.canal, titulo: info.titulo || v.titulo }).eq("id", v.id);
     }
-    const yt = idYoutube(v.link_origem);
-    if (usaKlap && yt) {
-      try {
-        const { data: p } = await admin.from("perfis").select("plano").eq("id", u.user.id).maybeSingle();
-        const qtd = CORTES[p?.plano ?? "gratis"] ?? 3;
-        const t = await klap("/tasks/video-to-shorts", {
-          source_video_url: `https://www.youtube.com/watch?v=${yt}`,
-          max_clip_count: qtd,
-          max_duration: 60,
-        });
-        await admin.from("videos").update({ klap_task_id: t.id, klap_folder_id: t.output_id }).eq("id", v.id);
-        return json({ ok: true, status: "analisando" });
-      } catch (e) {
-        console.error("klap inicio", e);
-        await admin.from("videos").update({ status: "erro", erro_detalhe: "Não conseguimos começar os cortes agora. Tente de novo em alguns minutos." }).eq("id", v.id);
-        return json({ erro: "Não conseguimos começar os cortes agora." }, 502);
-      }
-    }
-    if (!GEMINI_KEY) {
-      await admin.from("videos").update({ status: "erro", erro_detalhe: "Envie um link do YouTube para gerar os cortes." }).eq("id", v.id);
-      return json({ erro: "Envie um link do YouTube para gerar os cortes." }, 400);
-    }
     EdgeRuntime.waitUntil(analisar(admin, v as Record<string, string | null>));
     return json({ ok: true, status: "analisando" });
   }
 
+  if (body.acao === "reels") {
+    const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+    const { data: v } = await admin.from("videos").select("id, link_origem, klap_status")
+      .eq("id", String(body.video_id ?? "")).eq("usuario_id", u.user.id).is("excluido_em", null).maybeSingle();
+    if (!v) return json({ erro: "Vídeo não encontrado." }, 404);
+    if (!idYoutube(v.link_origem)) return json({ erro: "Os Reels prontos funcionam com links do YouTube." }, 400);
+    if (v.klap_status) return json({ status: v.klap_status });
+    const { data: p } = await admin.from("perfis").select("plano").eq("id", u.user.id).maybeSingle();
+    if ((p?.plano ?? "gratis") === "gratis") return json({ pagar: true, valor: PRECO_REEL }, 402);
+    await admin.from("videos").update({ klap_status: "pago", reels_qtd: REELS_PLANO }).eq("id", v.id).is("klap_status", null);
+    return json({ status: "pago" });
+  }
+
   if (body.acao === "verificar") {
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
-    const { data: v } = await admin.from("videos").select("id, usuario_id, status, klap_task_id, klap_folder_id")
+    const { data: v } = await admin.from("videos").select("id, usuario_id, link_origem, klap_status, klap_task_id, klap_folder_id, reels_qtd")
       .eq("id", String(body.video_id ?? "")).eq("usuario_id", u.user.id).maybeSingle();
     if (!v) return json({ erro: "Vídeo não encontrado." }, 404);
-    if (v.status !== "analisando" || !v.klap_task_id || !KLAP_KEY) return json({ status: v.status });
+    if (!KLAP_KEY || !v.klap_status || v.klap_status === "pronto" || v.klap_status === "erro") return json({ klap_status: v.klap_status });
     try {
+      // pagamento confirmado -> começa os Reels (trava para não começar duas vezes)
+      if (v.klap_status === "pago") {
+        const { data: trava } = await admin.from("videos").update({ klap_status: "iniciando" }).eq("id", v.id).eq("klap_status", "pago").select("id").maybeSingle();
+        if (!trava) return json({ klap_status: "iniciando" });
+        const yt = idYoutube(v.link_origem);
+        try {
+          const t = await klap("/tasks/video-to-shorts", {
+            source_video_url: `https://www.youtube.com/watch?v=${yt}`,
+            max_clip_count: Math.min(10, Math.max(1, v.reels_qtd ?? 1)),
+            max_duration: 60,
+          });
+          await admin.from("videos").update({ klap_status: "gerando", klap_task_id: t.id, klap_folder_id: t.output_id }).eq("id", v.id);
+          return json({ klap_status: "gerando" });
+        } catch (e) {
+          console.error("klap inicio", e);
+          await admin.from("videos").update({ klap_status: "pago" }).eq("id", v.id); // tenta de novo na próxima verificação
+          return json({ klap_status: "pago" });
+        }
+      }
+      if (v.klap_status !== "gerando" || !v.klap_task_id) return json({ klap_status: v.klap_status });
       const t = await klap(`/tasks/${v.klap_task_id}`);
       const st = String(t?.status ?? "").toLowerCase();
       if (KLAP_ERRO.includes(st)) {
-        await admin.from("videos").update({ status: "erro", erro_detalhe: "Não conseguimos cortar este vídeo. Confira se ele é público no YouTube." }).eq("id", v.id);
-        return json({ status: "erro" });
+        await admin.from("videos").update({ klap_status: "erro" }).eq("id", v.id);
+        return json({ klap_status: "erro" });
       }
-      if (st !== "ready" && st !== "completed") return json({ status: "analisando" });
+      if (st !== "ready" && st !== "completed") return json({ klap_status: "gerando" });
       const folder = t.output_id || v.klap_folder_id;
       const lista = await klap(`/projects/${folder}`);
       const shorts = (Array.isArray(lista) ? lista : (lista?.data ?? lista?.projects ?? [])) as any[];
       shorts.sort((a, b) => (Number(b.virality_score) || 0) - (Number(a.virality_score) || 0));
       if (!shorts.length) {
-        await admin.from("videos").update({ status: "erro", erro_detalhe: "A IA não encontrou bons cortes neste vídeo." }).eq("id", v.id);
-        return json({ status: "erro" });
+        await admin.from("videos").update({ klap_status: "erro" }).eq("id", v.id);
+        return json({ klap_status: "erro" });
       }
-      await admin.from("clipes").delete().eq("video_id", v.id);
-      const ins = await admin.from("clipes").insert(shorts.slice(0, 20).map((s) => {
+      await admin.from("clipes").delete().eq("video_id", v.id).eq("origem", "reel");
+      const ins = await admin.from("clipes").insert(shorts.slice(0, v.reels_qtd ?? 1).map((s) => {
         const sc = Number(s.virality_score) || 0;
         return {
-          video_id: v.id, usuario_id: v.usuario_id, klap_project_id: String(s.id),
-          titulo: String(s.name ?? s.title ?? "Corte").slice(0, 80),
+          video_id: v.id, usuario_id: v.usuario_id, origem: "reel", pago: true, klap_project_id: String(s.id),
+          titulo: String(s.name ?? s.title ?? "Reel").slice(0, 80),
           nota_viral: Math.round(sc <= 1 ? sc * 100 : sc),
           motivo: String(s.virality_score_explanation ?? "").slice(0, 300),
           inicio_segundos: Math.max(0, Math.round(Number(s.start_time ?? s.start ?? 0)) || 0),
@@ -314,11 +325,11 @@ Deno.serve(async (req) => {
         };
       }));
       if (ins.error) throw new Error(ins.error.message);
-      await admin.from("videos").update({ status: "pronto", klap_folder_id: folder, erro_detalhe: null, analisado_em: new Date().toISOString() }).eq("id", v.id);
-      return json({ status: "pronto" });
+      await admin.from("videos").update({ klap_status: "pronto", klap_folder_id: folder }).eq("id", v.id);
+      return json({ klap_status: "pronto" });
     } catch (e) {
       console.error("klap verificar", e);
-      return json({ status: "analisando" });
+      return json({ klap_status: v.klap_status });
     }
   }
 
@@ -326,19 +337,13 @@ Deno.serve(async (req) => {
     if (!KLAP_KEY) return json({ erro: "Download de cortes prontos ainda não está ativo." }, 503);
     const admin = createClient(SUPABASE_URL, SERVICE_KEY);
     const { data: c } = await admin.from("clipes")
-      .select("id, usuario_id, video_id, klap_project_id, export_id, video_url, videos(klap_folder_id)")
+      .select("id, usuario_id, video_id, klap_project_id, export_id, video_url, pago, origem, videos(klap_folder_id)")
       .eq("id", String(body.clipe_id ?? "")).eq("usuario_id", u.user.id).maybeSingle();
-    if (!c || !c.klap_project_id) return json({ erro: "Corte não encontrado." }, 404);
+    if (!c || !c.klap_project_id || c.origem !== "reel" || !c.pago) return json({ erro: "Reel não encontrado." }, 404);
     if (c.video_url) return json({ status: "pronto", url: c.video_url });
     const folder = (c as any).videos?.klap_folder_id;
     try {
       if (!c.export_id) {
-        const { data: p } = await admin.from("perfis").select("plano").eq("id", u.user.id).maybeSingle();
-        if ((p?.plano ?? "gratis") === "gratis") {
-          const { count } = await admin.from("clipes").select("id", { count: "exact", head: true })
-            .eq("usuario_id", u.user.id).not("export_id", "is", null);
-          if ((count ?? 0) >= DOWNLOADS_GRATIS) return json({ erro: `No plano Grátis você pode baixar ${DOWNLOADS_GRATIS} cortes. Assine para baixar todos.` }, 402);
-        }
         // trava contra cliques repetidos: só cria o export se ainda não houver um
         const { data: trava } = await admin.from("clipes").update({ export_id: "criando" }).eq("id", c.id).is("export_id", null).select("id").maybeSingle();
         if (!trava) return json({ status: "gerando" });
