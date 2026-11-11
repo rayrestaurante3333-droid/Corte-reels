@@ -75,11 +75,18 @@ section > h2{font-size:32px;margin-bottom:12px}
 .clip{border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;gap:4px;background:#121017}
 .clip .sc{font:700 22px var(--mono);color:var(--score);font-variant-numeric:tabular-nums}
 .clip .ct{font-weight:700;font-size:14px;line-height:1.25}
+.exemplo .clip .tm{font:500 11px var(--mono);color:var(--muted)}.exemplo .clip .lg{font-size:12px;color:var(--muted);line-height:1.3}
 .clip .tm{font:500 11px var(--mono);color:var(--muted)}
 button.clip{color:inherit;font:inherit;text-align:left;cursor:pointer;width:100%}button.clip:active{border-color:var(--score)}
 .sec{margin:4px 0 0;font-size:13px;font-weight:700;color:var(--muted)}
 .oferta{border:1px solid var(--score);border-radius:12px;padding:12px;display:grid;gap:8px;background:#18141c;font-size:14px;line-height:1.4}
 .clip.reel{border-color:var(--score)}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}@media(min-width:640px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:2px}
+.kpi b{font:700 24px var(--mono);font-variant-numeric:tabular-nums}.kpi span{font-size:12px;color:var(--muted)}.kpi.din b{color:var(--ok)}
+.tab-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+.tab{width:100%;border-collapse:collapse;font-size:13px}.tab th,.tab td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.tab th{color:var(--muted);font-weight:500}.tab td.n{text-align:right;font-family:var(--mono)}
 .aviso{margin:0;font-size:14px;line-height:1.4;color:var(--muted)}.aviso.err{color:var(--rec)}.aviso.ok{color:var(--ok)}
 .pix-qr{width:220px;height:220px;margin:0 auto;display:block;background:#fff;border-radius:10px;padding:8px}
 .pix-cc{width:100%;font:12px var(--mono);background:#121017;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;resize:none}
@@ -128,6 +135,18 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         <button class="link" id="a-esqueci" type="button">Esqueci minha senha</button>
       </form>
     </div>
+    <section class="card exemplo" aria-labelledby="ex-h">
+      <p class="eyebrow">Exemplo de resultado</p>
+      <h2 id="ex-h" style="font-size:26px">Live de 2h → 4 cortes virais em 2 minutos</h2>
+      <p class="muted" style="font-size:14px">Assim a IA mostra os melhores momentos de uma live de GTA (exemplo ilustrativo):</p>
+      <div class="clips">
+        <div class="clip"><span class="sc">94</span><span class="ct">Fugi da polícia com 1% de vida 😱</span><span class="tm">✂️ 01:12:40 → 01:13:25</span><span class="lg">Ninguém acreditou nessa fuga… 🚔🔥</span></div>
+        <div class="clip"><span class="sc">89</span><span class="ct">O chat escolheu e deu ruim</span><span class="tm">✂️ 00:34:10 → 00:34:52</span><span class="lg">Nunca mais deixo o chat decidir 😂</span></div>
+        <div class="clip"><span class="sc">85</span><span class="ct">Teoria: o final do GTA 6</span><span class="tm">✂️ 01:45:03 → 01:45:58</span><span class="lg">Será que é isso mesmo? Comenta 👀</span></div>
+        <div class="clip"><span class="sc">81</span><span class="ct">Reação ao carro mais caro</span><span class="tm">✂️ 00:08:21 → 00:08:59</span><span class="lg">Quanto você acha que custa? 💸</span></div>
+      </div>
+      <p class="muted" style="font-size:13px">Cada corte vem com nota viral de 0 a 100, título, legenda e o minuto exato. Quer pronto para postar? Reels a partir de R$ 8,99 no Pix.</p>
+    </section>
   </main>
 
   <!-- Nova senha (link de recuperação) -->
@@ -185,6 +204,15 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     <section>
       <h2>Seus vídeos</h2>
       <div class="videos" id="videos"><div class="empty">Carregando…</div></div>
+    </section>
+
+    <section class="hidden" id="admin" aria-labelledby="adm-h" style="display:grid;gap:12px">
+      <div class="top"><h2 id="adm-h">Painel Admin</h2><button class="btn small" type="button" id="adm-atual">Atualizar</button></div>
+      <div class="kpis" id="adm-kpis"></div>
+      <h3 style="font-size:20px">Últimos pagamentos</h3>
+      <div class="tab-wrap"><table class="tab" id="adm-pag"></table></div>
+      <h3 style="font-size:20px">Últimos cadastros</h3>
+      <div class="tab-wrap"><table class="tab" id="adm-cad"></table></div>
     </section>
 
     <div class="player hidden" id="player" role="dialog" aria-modal="true" aria-labelledby="pl-tit">
@@ -305,6 +333,8 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     $('u-plano').textContent = nomes[perfil.plano] || 'Grátis';
     $('u-plano').className = 'badge ' + perfil.plano;
     $('u-upgrade').classList.toggle('hidden', perfil.plano === 'agencia' || perfil.plano === 'admin');
+    $('admin').classList.toggle('hidden', perfil.plano !== 'admin');
+    if (perfil.plano === 'admin') carregarAdmin();
     carregarVideos();
     if (canal) sb.removeChannel(canal);
     canal = sb.channel('meus-videos')
@@ -468,6 +498,27 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     alert('O Reel está demorando mais que o normal. Tente de novo em alguns minutos.');
     return null;
   }
+  async function carregarAdmin() {
+    var k = $('adm-kpis'); k.innerHTML = '<div class="empty">Carregando…</div>';
+    var d = await chamarFn('admin', {}, 'Não foi possível carregar o painel.');
+    if (d.erro) { k.textContent = d.erro; return; }
+    var dt = function (x) { return x ? new Date(x).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''; };
+    var cards = [['Faturamento total', reais(d.faturamento || 0), 1], ['Faturamento hoje', reais(d.faturamentoHoje || 0), 1], ['Vendas no Pix', d.vendas, 0], ['Reels vendidos', d.reelsVendidos, 0],
+      ['Cadastros', d.usuarios, 0], ['Novos (7 dias)', d.novos7, 0], ['Vídeos enviados', d.videos, 0], ['Vídeos (7 dias)', d.videos7, 0]];
+    k.innerHTML = '';
+    cards.forEach(function (c) { var e = document.createElement('div'); e.className = 'kpi' + (c[2] ? ' din' : ''); e.innerHTML = '<b></b><span></span>'; e.querySelector('b').textContent = c[1]; e.querySelector('span').textContent = c[0]; k.appendChild(e); });
+    var tabela = function (el, cab, linhas, numCols) {
+      el.innerHTML = '';
+      var tr = document.createElement('tr'); cab.forEach(function (h) { var th = document.createElement('th'); th.textContent = h; tr.appendChild(th); }); el.appendChild(tr);
+      if (!linhas.length) { var v = document.createElement('tr'); var td = document.createElement('td'); td.colSpan = cab.length; td.textContent = 'Nada por aqui ainda.'; v.appendChild(td); el.appendChild(v); return; }
+      linhas.forEach(function (l) { var r = document.createElement('tr'); l.forEach(function (c, i) { var td = document.createElement('td'); td.textContent = c; if (numCols.indexOf(i) >= 0) td.className = 'n'; r.appendChild(td); }); el.appendChild(r); });
+    };
+    var stt = { pago: '✅ pago', pendente: '⏳ pendente', cancelado: '✖ cancelado' };
+    tabela($('adm-pag'), ['Data', 'Cliente', 'Reels', 'Valor', 'Status'], (d.ultimosPagamentos || []).map(function (p) { return [dt(p.criado_em), p.email, p.quantidade, reais(Number(p.valor || 0)), stt[p.status] || p.status]; }), [2, 3]);
+    var pl = { gratis: 'Grátis', criador: 'Criador', agencia: 'Pro', admin: 'Admin' };
+    tabela($('adm-cad'), ['Data', 'Nome', 'E-mail', 'Plano'], (d.ultimosCadastros || []).map(function (u) { return [dt(u.criado_em), u.nome || '', u.email || '', pl[u.plano] || u.plano]; }), []);
+  }
+  $('adm-atual').onclick = carregarAdmin;
   async function carregarVideos() {
     var r = await sb.from('videos').select('id,titulo,link_origem,caminho_arquivo,canal_origem,status,erro_detalhe,criado_em,klap_status,reels_qtd,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset,legenda,hashtags,motivo,klap_project_id,video_url,origem)').is('excluido_em', null).order('criado_em', { ascending: false });
     var el = $('videos'); el.innerHTML = '';
