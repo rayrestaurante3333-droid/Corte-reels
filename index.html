@@ -68,7 +68,13 @@ section > h2{font-size:32px;margin-bottom:12px}
 .clip .sc{font:700 22px var(--mono);color:var(--score);font-variant-numeric:tabular-nums}
 .clip .ct{font-weight:700;font-size:14px;line-height:1.25}
 .clip .tm{font:500 11px var(--mono);color:var(--muted)}
-a.clip{color:inherit;text-decoration:none;cursor:pointer}a.clip:active{border-color:var(--score)}
+button.clip{color:inherit;font:inherit;text-align:left;cursor:pointer;width:100%}button.clip:active{border-color:var(--score)}
+.aviso{margin:0;font-size:14px;line-height:1.4;color:var(--muted)}.aviso.err{color:var(--rec)}
+.player{position:fixed;inset:0;background:rgba(5,4,8,.92);z-index:50;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:16px}
+.player .in{width:100%;max-width:480px;display:grid;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+.player .area{aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden}.player .area iframe,.player .area video{width:100%;height:100%;border:0;display:block}
+.player h3{margin:0;font-size:18px}.player .leg{white-space:pre-wrap;font-size:14px;line-height:1.4;background:#121017;border:1px solid var(--line);border-radius:10px;padding:10px;margin:0}
+.player .top{display:flex;justify-content:space-between;gap:10px;align-items:start}
 .clip .lg{font-size:12px;color:var(--muted);line-height:1.3}.clip .go{font:700 11px var(--mono);color:var(--score)}
 .video .t a{color:inherit}
 .empty{color:var(--muted);padding:16px;border:1px dashed var(--line);border-radius:12px;text-align:center}
@@ -165,7 +171,16 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       <div class="videos" id="videos"><div class="empty">Carregando…</div></div>
     </section>
 
-    <footer>A análise com IA (nota viral de 0 a 100) está sendo ativada. Seus vídeos ficam guardados e serão analisados assim que ela estiver no ar.</footer>
+    <div class="player hidden" id="player" role="dialog" aria-modal="true" aria-labelledby="pl-tit">
+      <div class="in">
+        <div class="top"><div><h3 id="pl-tit"></h3><div class="muted" id="pl-info" style="font-size:13px"></div></div><button class="btn small" type="button" id="pl-fechar">Fechar</button></div>
+        <div class="area" id="pl-area"></div>
+        <p class="muted" id="pl-motivo" style="margin:0;font-size:14px"></p>
+        <p class="leg" id="pl-leg"></p>
+        <button class="btn primary small" type="button" id="pl-copiar">Copiar legenda</button>
+      </div>
+    </div>
+    <footer>A IA assiste seu vídeo e escolhe os melhores cortes com nota viral de 0 a 100, título e legenda prontos — em 1 a 3 minutos.</footer>
   </main>
 </div>
 
@@ -274,15 +289,66 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   }
   function erroInsert(e, padrao) { return /LIMITE_PLANO/.test(e.message || '') ? MSG_LIMITE : padrao; }
 
-  var STATUS = { enviado: ['Na fila', 'proc'], transcrevendo: ['Transcrevendo', 'proc'], analisando: ['Achando virais', 'proc'], pronto: ['Pronto', 'pronto'], erro: ['Erro', 'erro'] };
+  var STATUS = { enviado: ['Aguardando', 'proc'], transcrevendo: ['Analisando', 'proc'], analisando: ['IA analisando', 'proc'], pronto: ['Pronto', 'pronto'], erro: ['Erro', 'erro'] };
   function fmt(s) { s = Math.max(0, Math.round(s || 0)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
 
   function idYoutube(u) {
     var m = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/.exec(u || '');
     return m ? m[1] : null;
   }
+  async function chamarIA(corpo) {
+    var r = await sb.functions.invoke('analisar-video', { body: corpo });
+    if (r.error) {
+      var m = 'Não foi possível falar com a IA agora.';
+      try { var j = await r.error.context.json(); if (j && j.erro) m = j.erro; } catch (e) {}
+      return { erro: m };
+    }
+    return r.data || {};
+  }
+  async function analisarVideo(id) {
+    var r = await chamarIA({ acao: 'analisar', video_id: id });
+    if (r.erro) msg($('up-msg'), r.erro, 'err');
+    carregarVideos();
+  }
+  function copiar(txt, btn) {
+    var fim = function () { var o = btn.textContent; btn.textContent = 'Copiado ✓'; setTimeout(function () { btn.textContent = o; }, 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(fim, function () { prompt('Copie a legenda:', txt); });
+    else prompt('Copie a legenda:', txt);
+  }
+  async function tocar(v, c) {
+    var box = $('player'), area = $('pl-area');
+    area.innerHTML = '';
+    $('pl-tit').textContent = c.titulo || 'Clipe';
+    $('pl-info').textContent = fmt(c.inicio_segundos) + '–' + fmt(c.fim_segundos) + (c.nota_viral != null ? ' · nota ' + c.nota_viral : '');
+    $('pl-motivo').textContent = c.motivo || '';
+    var leg = (c.legenda || '') + (c.hashtags && c.hashtags.length ? '\n\n' + c.hashtags.join(' ') : '');
+    $('pl-leg').textContent = leg;
+    $('pl-copiar').onclick = function () { copiar(leg, $('pl-copiar')); };
+    var yt = idYoutube(v.link_origem), ini = Math.floor(c.inicio_segundos || 0), fim = Math.ceil(c.fim_segundos || 0);
+    if (yt) {
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube-nocookie.com/embed/' + yt + '?start=' + ini + '&end=' + fim + '&autoplay=1&playsinline=1&rel=0';
+      f.allow = 'autoplay; encrypted-media; picture-in-picture'; f.allowFullscreen = true; f.title = c.titulo || 'Clipe';
+      area.appendChild(f);
+    } else if (v.caminho_arquivo) {
+      var u = await sb.storage.from('videos').createSignedUrl(v.caminho_arquivo, 3600);
+      if (u.error) { area.textContent = 'Não foi possível abrir o vídeo.'; }
+      else {
+        var vd = document.createElement('video'); vd.controls = true; vd.playsInline = true; vd.autoplay = true;
+        vd.src = u.data.signedUrl + '#t=' + ini + ',' + fim;
+        vd.ontimeupdate = function () { if (vd.currentTime >= fim) vd.pause(); };
+        area.appendChild(vd);
+      }
+    }
+    box.classList.remove('hidden'); document.body.style.overflow = 'hidden';
+  }
+  function fecharPlayer() { $('player').classList.add('hidden'); $('pl-area').innerHTML = ''; document.body.style.overflow = ''; }
+  $('pl-fechar').onclick = fecharPlayer;
+  $('player').onclick = function (e) { if (e.target === $('player')) fecharPlayer(); };
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('player').classList.contains('hidden')) fecharPlayer(); });
+
   async function carregarVideos() {
-    var r = await sb.from('videos').select('id,titulo,link_origem,status,criado_em,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset)').is('excluido_em', null).order('criado_em', { ascending: false });
+    var r = await sb.from('videos').select('id,titulo,link_origem,caminho_arquivo,canal_origem,status,erro_detalhe,criado_em,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset,legenda,hashtags,motivo)').is('excluido_em', null).order('criado_em', { ascending: false });
     var el = $('videos'); el.innerHTML = '';
     if (r.error) { el.innerHTML = '<div class="empty">Não foi possível carregar seus vídeos agora.</div>'; return; }
     if (!r.data.length) { el.innerHTML = '<div class="empty">Você ainda não enviou nenhum vídeo. Envie o primeiro acima!</div>'; return; }
@@ -295,20 +361,30 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         var a = document.createElement('a'); a.href = v.link_origem; a.target = '_blank'; a.rel = 'noopener'; a.textContent = nomeV;
         box.querySelector('.t').appendChild(a);
       } else box.querySelector('.t').textContent = nomeV;
-      box.querySelector('.muted').textContent = new Date(v.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      box.querySelector('.muted').textContent = (v.canal_origem ? v.canal_origem + ' · ' : '') + new Date(v.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
       box.querySelector('.st').textContent = st[0];
+      if (v.status === 'analisando' || v.status === 'transcrevendo') {
+        var an = document.createElement('p'); an.className = 'aviso'; an.textContent = '🤖 A IA está assistindo seu vídeo e escolhendo os melhores cortes. Leva de 1 a 3 minutos — pode deixar esta tela aberta.';
+        box.appendChild(an);
+      }
+      if (v.status === 'enviado' || v.status === 'erro') {
+        if (v.status === 'erro' && v.erro_detalhe) { var er = document.createElement('p'); er.className = 'aviso err'; er.textContent = v.erro_detalhe; box.appendChild(er); }
+        var go = document.createElement('button'); go.type = 'button'; go.className = 'btn primary small';
+        go.textContent = v.status === 'erro' ? 'Tentar de novo' : '✨ Analisar com IA';
+        go.onclick = function () { go.disabled = true; go.textContent = 'Iniciando…'; analisarVideo(v.id); };
+        box.appendChild(go);
+      }
       var clipes = (v.clipes || []).sort(function (a, b) { return (b.nota_viral || 0) - (a.nota_viral || 0); });
       if (clipes.length) {
         var g = document.createElement('div'); g.className = 'clips';
         clipes.forEach(function (c) {
-          var yt = idYoutube(v.link_origem);
-          var d = document.createElement(yt ? 'a' : 'div'); d.className = 'clip';
-          if (yt) { d.href = 'https://www.youtube.com/watch?v=' + yt + '&t=' + Math.floor(c.inicio_segundos || 0) + 's'; d.target = '_blank'; d.rel = 'noopener'; }
-          d.innerHTML = '<span class="sc"></span><span class="ct"></span><span class="tm"></span><span class="lg"></span>' + (yt ? '<span class="go">▶ Assistir trecho</span>' : '');
+          var d = document.createElement('button'); d.type = 'button'; d.className = 'clip';
+          d.innerHTML = '<span class="sc"></span><span class="ct"></span><span class="tm"></span><span class="lg"></span><span class="go">▶ Assistir corte</span>';
           d.querySelector('.lg').textContent = c.legenda || '';
           d.querySelector('.sc').textContent = c.nota_viral != null ? c.nota_viral : '–';
           d.querySelector('.ct').textContent = c.titulo || 'Clipe';
-          d.querySelector('.tm').textContent = fmt(c.inicio_segundos) + '–' + fmt(c.fim_segundos) + ' · ' + (c.preset || 'tela_cheia').replace('_', ' ');
+          d.querySelector('.tm').textContent = fmt(c.inicio_segundos) + '–' + fmt(c.fim_segundos);
+          d.onclick = function () { tocar(v, c); };
           g.appendChild(d);
         });
         box.appendChild(g);
@@ -327,6 +403,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     });
   }
 
+
   // Upload
   var drop = $('drop'), file = $('file');
   drop.onclick = function () { file.click(); };
@@ -337,6 +414,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   file.onchange = function () { if (file.files[0]) enviar(file.files[0]); file.value = ''; };
 
   async function donoDoLink(l) {
+    if (idYoutube(l)) { var i = await chamarIA({ acao: 'info', url: l }); if (i && i.canal) return { canal: i.canal, titulo: i.titulo || '' }; }
     try {
       var c = new AbortController(); setTimeout(function () { c.abort(); }, 5000);
       var r = await fetch('https://noembed.com/embed?url=' + encodeURIComponent(l), { signal: c.signal });
@@ -370,11 +448,11 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     clearInterval(t);
     if (up.error) { prog.classList.add('hidden'); return msg($('up-msg'), 'Não deu para enviar o vídeo. Tente de novo.', 'err'); }
     bar.style.width = '100%';
-    var ins = await sb.from('videos').insert({ titulo: f.name.replace(/\.[^.]+$/, ''), caminho_arquivo: caminho, direitos_confirmados: true });
+    var ins = await sb.from('videos').insert({ titulo: f.name.replace(/\.[^.]+$/, ''), caminho_arquivo: caminho, direitos_confirmados: true }).select('id').single();
     setTimeout(function () { prog.classList.add('hidden'); bar.style.width = '0'; }, 800);
     if (ins.error) return msg($('up-msg'), erroDireitos(ins.error, 'O vídeo subiu, mas não foi registrado. Tente de novo.'), 'err');
-    msg($('up-msg'), 'Vídeo enviado! Ele entrou na fila de análise.', 'ok');
-    carregarVideos();
+    msg($('up-msg'), 'Vídeo enviado! A IA já começou a analisar. 🤖', 'ok');
+    analisarVideo(ins.data.id);
   }
 
   $('f-link').addEventListener('submit', async function (e) {
@@ -389,10 +467,10 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     var alerta = info ? 'Este vídeo é do canal “' + (info.canal || 'desconhecido') + '”. Se esse canal não é seu, você precisa da autorização do dono.' : 'Não conseguimos identificar o dono deste vídeo. Confira antes de enviar.';
     if (!(await confirmarDireitos(fonte, alerta))) return;
     var tit = info && info.titulo ? info.titulo : l.replace(/^https?:\/\/(www\.|m\.)?/, '').replace(/[?&](is|si|feature)=[^&]*/g, '');
-    var ins = await sb.from('videos').insert({ link_origem: l, titulo: tit.slice(0, 120), canal_origem: info && info.canal ? info.canal.slice(0, 200) : null, direitos_confirmados: true });
+    var ins = await sb.from('videos').insert({ link_origem: l, titulo: tit.slice(0, 120), canal_origem: info && info.canal ? info.canal.slice(0, 200) : null, direitos_confirmados: true }).select('id').single();
     if (ins.error) return msg($('up-msg'), erroDireitos(ins.error, 'Não deu para adicionar o link. Tente de novo.'), 'err');
-    $('link').value = ''; msg($('up-msg'), 'Link adicionado! Ele entrou na fila de análise.', 'ok');
-    carregarVideos();
+    $('link').value = ''; msg($('up-msg'), 'Link adicionado! A IA já começou a analisar. 🤖', 'ok');
+    analisarVideo(ins.data.id);
   });
 
   // ---------- Sessão ----------
