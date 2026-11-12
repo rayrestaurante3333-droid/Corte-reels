@@ -480,7 +480,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     var box = $('player'), area = $('pl-area');
     area.innerHTML = '';
     $('pl-tit').textContent = c.titulo || 'Clipe';
-    $('pl-info').textContent = fmt(c.inicio_segundos) + '–' + fmt(c.fim_segundos) + (c.nota_viral != null ? ' · nota ' + c.nota_viral : '');
+    $('pl-info').textContent = (c.fim_segundos ? fmt(c.inicio_segundos) + '–' + fmt(c.fim_segundos) : (c.origem === 'reel' ? 'Reel pronto 9:16' : '')) + (c.nota_viral != null ? ' · nota ' + c.nota_viral : '');
     $('pl-motivo').textContent = c.motivo || '';
     var leg = (c.legenda || c.titulo || '') + (c.hashtags && c.hashtags.length ? '\n\n' + c.hashtags.join(' ') : '');
     $('pl-leg').textContent = leg;
