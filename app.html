@@ -472,8 +472,17 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   }
   function copiar(txt, btn) {
     var fim = function () { var o = btn.textContent; btn.textContent = 'Copiado ✓'; setTimeout(function () { btn.textContent = o; }, 1500); };
-    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(fim, function () { prompt('Copie a legenda:', txt); });
-    else prompt('Copie a legenda:', txt);
+    // sem HTTPS o navigator.clipboard não existe: usa o jeito antigo, que funciona em qualquer site
+    var antigo = function () {
+      var t = document.createElement('textarea'); t.value = txt; t.setAttribute('readonly', '');
+      t.style.position = 'fixed'; t.style.top = '0'; t.style.opacity = '0';
+      document.body.appendChild(t); t.focus(); t.select(); t.setSelectionRange(0, txt.length);
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(t);
+      if (ok) fim(); else prompt('Segure o texto abaixo e copie:', txt);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(fim, antigo);
+    else antigo();
   }
   async function tocar(v, c, btn) {
     if (c.klap_project_id && !c.video_url) { if (btn && /Gerando/.test(btn.textContent)) return; if (!(await pegarReel(c, btn))) return; if (btn) btn.textContent = '▶ Ver e baixar Reel'; }
