@@ -105,6 +105,7 @@ const SCHEMA = {
 
 async function chamarGemini(videoPart: Record<string, unknown>) {
   let ultimoErro = "";
+  let ocupado = false;
   for (const modelo of MODELOS) {
     const r = await fetch(`${API}/v1beta/models/${modelo}:generateContent`, {
       method: "POST",
@@ -122,11 +123,13 @@ async function chamarGemini(videoPart: Record<string, unknown>) {
     }
     ultimoErro = `${modelo}: HTTP ${r.status} ${txt.slice(0, 300)}`;
     console.error("gemini", ultimoErro);
-    // modelo inexistente, sem acesso ou sem cota -> tenta o próximo
-    if (![400, 403, 404, 429].includes(r.status)) break;
+    // modelo inexistente, sem acesso, sem cota ou sobrecarregado -> tenta o próximo
+    if (![400, 403, 404, 429, 500, 502, 503, 504].includes(r.status)) break;
+    if (r.status >= 500 || r.status === 429) ocupado = true;
+    if (r.status >= 500) await new Promise((ok) => setTimeout(ok, 2000));
     if (r.status === 400 && !/model|not found|not supported/i.test(txt)) break;
   }
-  throw new Error(ultimoErro || "Falha na IA");
+  throw new Error((ocupado ? "high demand | " : "") + (ultimoErro || "Falha na IA"));
 }
 
 async function enviarArquivoGemini(bytes: Uint8Array, mime: string, nome: string) {
@@ -212,12 +215,15 @@ async function analisar(admin: ReturnType<typeof createClient>, v: Record<string
   } catch (e) {
     const m = e instanceof Error ? e.message : String(e);
     console.error("analise falhou", v.id, m);
-    const amigavel = /429|quota|RESOURCE_EXHAUSTED/i.test(m)
-      ? "Muitos vídeos sendo analisados agora. Tente de novo em alguns minutos."
-      : /private|unavailable|not accessible|PERMISSION/i.test(m)
+    const amigavel = /429|quota|RESOURCE_EXHAUSTED|HTTP 50\d|high demand|overloaded/i.test(m)
+      ? "A IA está muito ocupada agora. Toque em \"Tentar de novo\" em alguns minutos."
+      : /private|video unavailable|not accessible|PERMISSION_DENIED/i.test(m)
       ? "Não conseguimos acessar esse vídeo. Ele precisa ser público no YouTube."
       : /^Erro|^Não|^A IA|^Por enquanto|^Envio/.test(m) ? m : "Não conseguimos analisar este vídeo. Tente de novo.";
-    await admin.from("videos").update({ status: "erro", erro_detalhe: amigavel, erro_tecnico: m.slice(0, 500) }).eq("id", v.id);
+    // IA ocupada não é culpa do cliente: não gasta tentativa
+    const ocupada = /429|quota|RESOURCE_EXHAUSTED|HTTP 50\d|high demand|overloaded/i.test(m);
+    const extra = ocupada ? { tentativas: Number(v.tentativas ?? 0) } : {};
+    await admin.from("videos").update({ status: "erro", erro_detalhe: amigavel, erro_tecnico: m.slice(0, 500), ...extra }).eq("id", v.id);
   } finally {
     if (arquivoGemini) fetch(`${API}/v1beta/${arquivoGemini}`, { method: "DELETE", headers: { "x-goog-api-key": GEMINI_KEY } }).catch(() => {});
   }
