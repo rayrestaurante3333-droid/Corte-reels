@@ -89,6 +89,7 @@ button.clip{color:inherit;font:inherit;text-align:left;cursor:pointer;width:100%
 .tab th{color:var(--muted);font-weight:500}.tab td.n{text-align:right;font-family:var(--mono)}
 .aviso{margin:0;font-size:14px;line-height:1.4;color:var(--muted)}.aviso.err{color:var(--rec)}.aviso.ok{color:var(--ok)}
 .pix-qr{width:220px;height:220px;margin:0 auto;display:block;background:#fff;border-radius:10px;padding:8px}
+#pix-qrbox svg{width:100%;height:100%;display:block}
 .pix-cc{width:100%;font:12px var(--mono);background:#121017;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px;resize:none}
 .pix-valor{font:700 28px var(--mono);color:var(--score);text-align:center}
 .player{position:fixed;inset:0;background:rgba(5,4,8,.92);z-index:50;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:16px}
@@ -198,6 +199,9 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     <section class="hidden" id="admin" aria-labelledby="adm-h" style="display:grid;gap:12px">
       <div class="top"><h2 id="adm-h">Painel Admin</h2><button class="btn small" type="button" id="adm-atual">Atualizar</button></div>
       <div class="kpis" id="adm-kpis"></div>
+      <h3 style="font-size:20px">💰 Pix para conferir</h3>
+      <p class="muted" style="margin:0;font-size:14px">Confira no app do Mercado Pago se o dinheiro caiu (mesmo valor). Só então toque em <b>Confirmar</b> — os Reels do cliente são liberados na hora.</p>
+      <div id="adm-pend" style="display:grid;gap:10px"></div>
       <h3 style="font-size:20px">Últimos pagamentos</h3>
       <div class="tab-wrap"><table class="tab" id="adm-pag"></table></div>
       <h3 style="font-size:20px">Últimos cadastros</h3>
@@ -228,9 +232,12 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         <div class="top"><div><h3 id="pix-h">Pague com Pix para baixar</h3><div class="muted" id="pix-tit" style="font-size:13px"></div></div><button class="btn small" type="button" id="pix-fechar">Fechar</button></div>
         <div class="pix-valor" id="pix-valor"></div>
         <img class="pix-qr" id="pix-qr" alt="QR Code do Pix">
+        <div class="pix-qr hidden" id="pix-qrbox" role="img" aria-label="QR Code do Pix"></div>
+        <p class="muted hidden" id="pix-chave" style="margin:0;font-size:14px"></p>
         <p class="muted" style="margin:0;font-size:14px">Pague pelo app do seu banco: escaneie o QR Code ou use o <b>Pix copia e cola</b>.</p>
         <textarea class="pix-cc" id="pix-cc" rows="3" readonly aria-label="Código Pix copia e cola"></textarea>
         <button class="btn primary small" type="button" id="pix-copiar">Copiar código Pix</button>
+        <button class="btn primary small hidden" type="button" id="pix-paguei">✅ Já paguei</button>
         <p class="aviso" id="pix-st" role="status"></p>
         <p class="muted" style="margin:0;font-size:13px">Pagou e não liberou? <a href="mailto:cortehype.app+suporte@gmail.com?subject=Suporte%20CorteHype%20-%20Pagamento" style="color:var(--score)">Fale com o suporte</a></p>
       </div>
@@ -240,6 +247,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script>
 (function () {
   var URL_SB = 'https://tredxfypgqswjmvpemkt.supabase.co';
@@ -397,6 +405,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     var r = await chamarFn('pix', { acao: 'criar', video_id: v.id, quantidade: qtd }, 'Não foi possível gerar o Pix agora.');
     if (r.erro) { alert(r.erro); return false; }
     if (r.pago) return true;
+    if (r.manual) return pagarPixManual(r, c);
     return new Promise(function (ok) {
       var v = Number(r.valor || valor || 8.99).toFixed(2).replace('.', ',');
       $('pix-valor').textContent = 'R$ ' + v;
@@ -416,6 +425,44 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         if (!$('pix').classList.contains('hidden')) pixTimer = setTimeout(checar, 4000);
       };
       pixTimer = setTimeout(checar, 4000);
+    });
+  }
+  function pagarPixManual(r, c) {
+    return new Promise(function (ok) {
+      $('pix-h').textContent = 'Pague com Pix';
+      $('pix-valor').textContent = reais(Number(r.valor || 0));
+      $('pix-tit').textContent = c.titulo || 'Reel';
+      $('pix-qr').classList.add('hidden');
+      var qb = $('pix-qrbox'); qb.innerHTML = '';
+      try { var q = qrcode(0, 'M'); q.addData(r.copia_cola); q.make(); qb.innerHTML = q.createSvgTag({ cellSize: 5, margin: 2, scalable: true }); qb.classList.remove('hidden'); } catch (e) { qb.classList.add('hidden'); }
+      $('pix-chave').innerHTML = 'Ou pague para a chave Pix (e-mail): <b></b> — no valor exato de <b></b>.';
+      var bs = $('pix-chave').querySelectorAll('b'); bs[0].textContent = r.chave; bs[1].textContent = reais(Number(r.valor || 0));
+      $('pix-chave').classList.remove('hidden');
+      $('pix-cc').value = r.copia_cola || '';
+      $('pix-copiar').onclick = function () { copiar(r.copia_cola || '', $('pix-copiar')); };
+      var st = $('pix-st'), bt = $('pix-paguei');
+      var esperando = function () { bt.classList.add('hidden'); st.className = 'aviso ok'; st.textContent = '✅ Recebemos seu aviso! Vamos conferir o Pix e liberar seus Reels — normalmente em poucos minutos. Pode fechar esta tela: o status aparece no seu vídeo.'; };
+      if (r.avisado) esperando();
+      else { bt.classList.remove('hidden'); st.className = 'aviso'; st.textContent = 'Depois de pagar no app do seu banco, toque em "Já paguei".'; }
+      bt.onclick = async function () {
+        bt.disabled = true;
+        var a = await chamarFn('pix', { acao: 'avisar', pagamento_id: r.pagamento_id }, 'Não foi possível avisar agora. Tente de novo.');
+        bt.disabled = false;
+        if (a.erro) { st.className = 'aviso err'; st.textContent = a.erro; return; }
+        esperando(); checar();
+      };
+      $('pix').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+      var limpar = function () { $('pix-h').textContent = 'Pague com Pix para baixar'; qb.classList.add('hidden'); $('pix-chave').classList.add('hidden'); bt.classList.add('hidden'); };
+      var fim = function (pago) { limpar(); fecharPix(); ok(pago); };
+      $('pix-fechar').onclick = function () { fim(false); carregarVideos(); };
+      var checar = async function () {
+        clearTimeout(pixTimer);
+        var s = await chamarFn('pix', { acao: 'status', pagamento_id: r.pagamento_id }, '');
+        if (s.status === 'pago') { st.textContent = '✅ Pagamento confirmado! Liberando seus Reels…'; st.className = 'aviso ok'; setTimeout(function () { fim(true); }, 1200); return; }
+        if (s.status === 'cancelado') { st.textContent = 'Não encontramos este Pix. Se você pagou, fale com o suporte.'; st.className = 'aviso err'; return; }
+        if (!$('pix').classList.contains('hidden')) pixTimer = setTimeout(checar, 10000);
+      };
+      if (r.avisado) checar();
     });
   }
   async function analisarVideo(id) {
@@ -504,6 +551,26 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       if (!linhas.length) { var v = document.createElement('tr'); var td = document.createElement('td'); td.colSpan = cab.length; td.textContent = 'Nada por aqui ainda.'; v.appendChild(td); el.appendChild(v); return; }
       linhas.forEach(function (l) { var r = document.createElement('tr'); l.forEach(function (c, i) { var td = document.createElement('td'); td.textContent = c; if (numCols.indexOf(i) >= 0) td.className = 'n'; r.appendChild(td); }); el.appendChild(r); });
     };
+    var pe = $('adm-pend'); pe.innerHTML = '';
+    if (!(d.pendentes || []).length) pe.innerHTML = '<div class="empty">Nenhum Pix esperando conferência.</div>';
+    (d.pendentes || []).forEach(function (p) {
+      var b = document.createElement('div'); b.className = 'oferta';
+      b.innerHTML = '<b></b><span></span><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary small" type="button">✅ Confirmar (caiu)</button><button class="btn small" type="button">✖ Não caiu</button></div>';
+      b.querySelector('b').textContent = reais(Number(p.valor || 0)) + ' · ' + p.quantidade + (p.quantidade > 1 ? ' Reels' : ' Reel');
+      b.querySelector('span').textContent = p.email + ' · avisou ' + dt(p.avisado_em) + (p.video ? ' · ' + p.video : '');
+      var bts = b.querySelectorAll('button');
+      var agir = async function (acao) {
+        if (acao === 'confirmar' && !confirm('O Pix de ' + reais(Number(p.valor || 0)) + ' caiu na sua conta?')) return;
+        if (acao === 'recusar' && !confirm('Marcar que este Pix NÃO caiu?')) return;
+        bts[0].disabled = bts[1].disabled = true;
+        var x = await chamarFn('admin', { acao: acao, pagamento_id: p.id }, 'Não foi possível salvar.');
+        if (x.erro) { alert(x.erro); bts[0].disabled = bts[1].disabled = false; return; }
+        carregarAdmin();
+      };
+      bts[0].onclick = function () { agir('confirmar'); };
+      bts[1].onclick = function () { agir('recusar'); };
+      pe.appendChild(b);
+    });
     var stt = { pago: '✅ pago', pendente: '⏳ pendente', cancelado: '✖ cancelado' };
     tabela($('adm-pag'), ['Data', 'Cliente', 'Reels', 'Valor', 'Status'], (d.ultimosPagamentos || []).map(function (p) { return [dt(p.criado_em), p.email, p.quantidade, reais(Number(p.valor || 0)), stt[p.status] || p.status]; }), [2, 3]);
     var pl = { gratis: 'Grátis', criador: 'Criador', agencia: 'Pro', admin: 'Admin' };
@@ -511,6 +578,8 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   }
   $('adm-atual').onclick = carregarAdmin;
   async function carregarVideos() {
+    var pz = await sb.from('pagamentos').select('video_id').eq('status', 'pendente').not('avisado_em', 'is', null);
+    var emConf = {}; (pz.data || []).forEach(function (x) { emConf[x.video_id] = true; });
     var r = await sb.from('videos').select('id,titulo,link_origem,caminho_arquivo,canal_origem,status,erro_detalhe,criado_em,klap_status,reels_qtd,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset,legenda,hashtags,motivo,klap_project_id,video_url,origem)').is('excluido_em', null).order('criado_em', { ascending: false });
     var el = $('videos'); el.innerHTML = '';
     if (!r.error) vigiar(r.data.filter(function (v) { return v.status === 'analisando' || ['pago', 'iniciando', 'gerando'].indexOf(v.klap_status) >= 0; }).map(function (v) { return v.id; }));
@@ -561,7 +630,9 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       montar(ideias, '💡 Melhores momentos (grátis) — corte você mesmo no CapCut usando os minutos', false);
       if (idYoutube(v.link_origem) && v.status === 'pronto') {
         var ks = v.klap_status;
-        if (!ks) {
+        if (!ks && emConf[v.id]) {
+          var ec = document.createElement('p'); ec.className = 'aviso'; ec.textContent = '⏳ Recebemos seu aviso de Pix. Estamos conferindo — assim que confirmar, seus Reels começam a ser feitos.'; box.appendChild(ec);
+        } else if (!ks) {
           var oferta = document.createElement('div'); oferta.className = 'oferta';
           oferta.innerHTML = '<b>🎬 Quer os Reels prontos para postar?</b><span>Em pé (9:16), com legenda animada, prontos para Instagram, TikTok e Shorts. A partir de ' + reais(PRECO_REEL) + ' por Reel no Pix.</span>';
           var bt = document.createElement('button'); bt.type = 'button'; bt.className = 'btn primary small'; bt.textContent = 'Quero Reels prontos';
@@ -570,7 +641,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         } else if (ks === 'erro') {
           var e2 = document.createElement('p'); e2.className = 'aviso err'; e2.textContent = 'Não conseguimos gerar os Reels deste vídeo. Escreva para cortehype.app+suporte@gmail.com para receber seu dinheiro de volta.'; box.appendChild(e2);
         } else if (ks !== 'pronto') {
-          var e3 = document.createElement('p'); e3.className = 'aviso'; e3.textContent = '🎬 Seus ' + (v.reels_qtd || '') + ' Reels prontos estão sendo feitos. Leva de 3 a 10 minutos — você pode sair e voltar depois.'; box.appendChild(e3);
+          var e3 = document.createElement('p'); e3.className = 'aviso'; e3.textContent = (ks === 'pago' ? '✅ Pagamento confirmado! ' : '') + '🎬 Seus ' + (v.reels_qtd || '') + ' Reels prontos estão sendo feitos. Você pode sair e voltar depois.'; box.appendChild(e3);
         }
       }
       montar(reels, '🎬 Seus Reels prontos para postar', true);

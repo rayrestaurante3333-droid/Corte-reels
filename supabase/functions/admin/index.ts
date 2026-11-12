@@ -22,6 +22,26 @@ Deno.serve(async (req) => {
   const { data: eu } = await admin.from("perfis").select("plano").eq("id", u.user.id).maybeSingle();
   if (eu?.plano !== "admin") return json({ erro: "Acesso negado." }, 403);
 
+  let body: Record<string, string> = {};
+  try { body = await req.json(); } catch { /* sem corpo */ }
+
+  // Confirmar / recusar um Pix manual (a dona confere no app do banco antes)
+  if (body.acao === "confirmar" || body.acao === "recusar") {
+    const { data: pag } = await admin.from("pagamentos").select("id, video_id, quantidade, status, metodo")
+      .eq("id", String(body.pagamento_id ?? "")).maybeSingle();
+    if (!pag || pag.metodo !== "manual") return json({ erro: "Pagamento não encontrado." }, 404);
+    if (pag.status !== "pendente") return json({ erro: "Este pagamento já foi resolvido." }, 409);
+    if (body.acao === "recusar") {
+      await admin.from("pagamentos").update({ status: "cancelado", confirmado_por: u.user.id }).eq("id", pag.id).eq("status", "pendente");
+      return json({ ok: true });
+    }
+    const { data: ok } = await admin.from("pagamentos").update({ status: "pago", pago_em: new Date().toISOString(), confirmado_por: u.user.id })
+      .eq("id", pag.id).eq("status", "pendente").select("id").maybeSingle();
+    if (!ok) return json({ erro: "Este pagamento já foi resolvido." }, 409);
+    await admin.from("videos").update({ klap_status: "pago", reels_qtd: pag.quantidade }).eq("id", pag.video_id).is("klap_status", null);
+    return json({ ok: true });
+  }
+
   const seteDias = new Date(Date.now() - 7 * 864e5).toISOString();
   // meia-noite de hoje no horário de Brasília (UTC-3)
   const hoje = new Date(Date.now() - 3 * 3600e3); hoje.setUTCHours(0, 0, 0, 0); hoje.setTime(hoje.getTime() + 3 * 3600e3);
@@ -48,7 +68,18 @@ Deno.serve(async (req) => {
   const { data: donos } = ids.length ? await admin.from("perfis").select("id, email").in("id", ids) : { data: [] as any[] };
   const emailDe = new Map((donos ?? []).map((d: any) => [d.id, d.email]));
 
+  const { data: pend } = await admin.from("pagamentos").select("id, valor, quantidade, criado_em, avisado_em, usuario_id, videos(titulo, link_origem)")
+    .eq("metodo", "manual").eq("status", "pendente").not("avisado_em", "is", null)
+    .order("avisado_em", { ascending: true }).limit(30);
+  const idsP = [...new Set((pend ?? []).map((x: any) => x.usuario_id))].filter((i) => !emailDe.has(i));
+  if (idsP.length) {
+    const { data: d2 } = await admin.from("perfis").select("id, email").in("id", idsP);
+    (d2 ?? []).forEach((d: any) => emailDe.set(d.id, d.email));
+  }
+
   return json({
+    pendentes: (pend ?? []).map((x: any) => ({ id: x.id, valor: x.valor, quantidade: x.quantidade, avisado_em: x.avisado_em,
+      email: emailDe.get(x.usuario_id) ?? "", video: x.videos?.titulo || x.videos?.link_origem || "" })),
     usuarios, novos7, videos, videos7, reelsBaixados,
     vendas: p.length,
     faturamento: somar(p),

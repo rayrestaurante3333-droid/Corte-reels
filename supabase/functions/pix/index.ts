@@ -1,4 +1,7 @@
-// CorteHype — pagamento por Pix (Mercado Pago) dos Reels prontos de um vídeo.
+// CorteHype — pagamento por Pix dos Reels prontos de um vídeo.
+// Sem MP_ACCESS_TOKEN: modo MANUAL — gera um Pix copia-e-cola com a chave da CorteHype e o valor exato;
+// o cliente avisa "Já paguei" e a dona confere no banco e confirma no Painel Admin.
+//   { "acao": "avisar", "pagamento_id": "<uuid>" } -> { ok }
 // Com login (POST JSON):
 //   { "acao": "criar",  "video_id": "<uuid>", "quantidade": 1|3|5 } -> { pago } ou { pagamento_id, copia_cola, qr_base64, valor, expira_em }
 //   { "acao": "status", "pagamento_id": "<uuid>" }   -> { status: "pendente" | "pago" | "cancelado" }
@@ -12,6 +15,27 @@ const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const MP_TOKEN = Deno.env.get("MP_ACCESS_TOKEN") ?? "";
 const PRECO = Number(Deno.env.get("PRECO_REEL") ?? "8.99");
 const MP = "https://api.mercadopago.com";
+const PIX_CHAVE = (Deno.env.get("PIX_CHAVE") ?? "cortehype.app@gmail.com").trim();
+const PIX_NOME = (Deno.env.get("PIX_NOME") ?? "CORTEHYPE").slice(0, 25);
+const PIX_CIDADE = (Deno.env.get("PIX_CIDADE") ?? "SAO PAULO").slice(0, 15);
+
+// Pix copia-e-cola (BR Code estático) com valor fixo
+function crc16(t: string) {
+  let c = 0xffff;
+  for (const b of new TextEncoder().encode(t)) {
+    c ^= b << 8;
+    for (let i = 0; i < 8; i++) c = c & 0x8000 ? ((c << 1) ^ 0x1021) & 0xffff : (c << 1) & 0xffff;
+  }
+  return c.toString(16).toUpperCase().padStart(4, "0");
+}
+const campo = (id: string, v: string) => id + String(v.length).padStart(2, "0") + v;
+function brCode(valor: number, txid: string) {
+  const s = campo("00", "01") +
+    campo("26", campo("00", "br.gov.bcb.pix") + campo("01", PIX_CHAVE)) +
+    campo("52", "0000") + campo("53", "986") + campo("54", valor.toFixed(2)) + campo("58", "BR") +
+    campo("59", PIX_NOME) + campo("60", PIX_CIDADE) + campo("62", campo("05", txid.slice(0, 25))) + "6304";
+  return s + crc16(s);
+}
 const WEBHOOK = `${SUPABASE_URL}/functions/v1/pix?webhook=1`;
 
 const CORS = {
@@ -76,10 +100,44 @@ Deno.serve(async (req) => {
   const userClient = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: auth } } });
   const { data: u } = await userClient.auth.getUser();
   if (!u?.user) return json({ erro: "Faça login de novo." }, 401);
-  if (!MP_TOKEN) return json({ erro: "O pagamento por Pix ainda não foi configurado." }, 503);
-
   let body: Record<string, string>;
   try { body = await req.json(); } catch { return json({ erro: "Pedido inválido" }, 400); }
+
+  if (body.acao === "avisar") {
+    const { data: pag } = await admin.from("pagamentos").update({ avisado_em: new Date().toISOString() })
+      .eq("id", String(body.pagamento_id ?? "")).eq("usuario_id", u.user.id).eq("metodo", "manual").eq("status", "pendente")
+      .select("id").maybeSingle();
+    return pag ? json({ ok: true }) : json({ erro: "Pagamento não encontrado." }, 404);
+  }
+
+  // ---- modo manual (sem Mercado Pago configurado) ----
+  if (!MP_TOKEN && body.acao === "criar") {
+    const qtd = [1, 3, 5].includes(Number(body.quantidade)) ? Number(body.quantidade) : 1;
+    const { data: v } = await admin.from("videos").select("id, link_origem, klap_status")
+      .eq("id", String(body.video_id ?? "")).eq("usuario_id", u.user.id).is("excluido_em", null).maybeSingle();
+    if (!v || !v.link_origem) return json({ erro: "Vídeo não encontrado." }, 404);
+    if (v.klap_status) return json({ pago: true });
+    const valor = Math.round(PRECO * qtd * 100) / 100;
+    const { data: aberto } = await admin.from("pagamentos").select("id, pix_copia_cola, valor, expira_em, avisado_em")
+      .eq("video_id", v.id).eq("quantidade", qtd).eq("status", "pendente").eq("metodo", "manual")
+      .gt("expira_em", new Date().toISOString()).order("criado_em", { ascending: false }).limit(1).maybeSingle();
+    if (aberto?.pix_copia_cola) {
+      return json({ manual: true, pagamento_id: aberto.id, copia_cola: aberto.pix_copia_cola, chave: PIX_CHAVE, valor: aberto.valor, expira_em: aberto.expira_em, avisado: !!aberto.avisado_em });
+    }
+    const expira = new Date(Date.now() + 24 * 3600e3);
+    const { data: pag, error } = await admin.from("pagamentos")
+      .insert({ usuario_id: u.user.id, video_id: v.id, quantidade: qtd, valor, expira_em: expira.toISOString(), metodo: "manual" }).select("id").single();
+    if (error || !pag) return json({ erro: "Não foi possível criar o pagamento." }, 500);
+    const cc = brCode(valor, "CH" + pag.id.replace(/-/g, "").slice(0, 23));
+    await admin.from("pagamentos").update({ pix_copia_cola: cc }).eq("id", pag.id);
+    return json({ manual: true, pagamento_id: pag.id, copia_cola: cc, chave: PIX_CHAVE, valor, expira_em: expira.toISOString(), avisado: false });
+  }
+  if (body.acao === "status") {
+    const { data: pm } = await admin.from("pagamentos").select("status, metodo")
+      .eq("id", String(body.pagamento_id ?? "")).eq("usuario_id", u.user.id).maybeSingle();
+    if (pm?.metodo === "manual") return json({ status: pm.status });
+  }
+  if (!MP_TOKEN) return json({ erro: "O pagamento por Pix ainda não foi configurado." }, 503);
 
   if (body.acao === "criar") {
     const qtd = [1, 3, 5].includes(Number(body.quantidade)) ? Number(body.quantidade) : 1;
@@ -91,7 +149,7 @@ Deno.serve(async (req) => {
 
     // reaproveita um Pix pendente ainda válido com a mesma quantidade (evita cobranças duplicadas)
     const { data: aberto } = await admin.from("pagamentos").select("id, pix_copia_cola, pix_qr_base64, valor, expira_em")
-      .eq("video_id", v.id).eq("quantidade", qtd).eq("status", "pendente").gt("expira_em", new Date(Date.now() + 60_000).toISOString())
+      .eq("video_id", v.id).eq("quantidade", qtd).eq("status", "pendente").eq("metodo", "mp").gt("expira_em", new Date(Date.now() + 60_000).toISOString())
       .order("criado_em", { ascending: false }).limit(1).maybeSingle();
     if (aberto?.pix_copia_cola) {
       return json({ pagamento_id: aberto.id, copia_cola: aberto.pix_copia_cola, qr_base64: aberto.pix_qr_base64, valor: aberto.valor, expira_em: aberto.expira_em });
