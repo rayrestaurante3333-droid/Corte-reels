@@ -13,7 +13,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const MP_TOKEN = Deno.env.get("MP_ACCESS_TOKEN") ?? "";
-const PRECO = Number(Deno.env.get("PRECO_REEL") ?? "8.99");
+const PRECO = 9.99; // preço de cada Reel pronto (R$)
 const MP = "https://api.mercadopago.com";
 const PIX_CHAVE = (Deno.env.get("PIX_CHAVE") ?? "cortehype.app@gmail.com").trim();
 const PIX_NOME = (Deno.env.get("PIX_NOME") ?? "CORTEHYPE").slice(0, 25);
@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
     if (v.klap_status) return json({ pago: true });
     const valor = Math.round(PRECO * qtd * 100) / 100;
     const { data: aberto } = await admin.from("pagamentos").select("id, pix_copia_cola, valor, expira_em, avisado_em")
-      .eq("video_id", v.id).eq("quantidade", qtd).eq("status", "pendente").eq("metodo", "manual")
+      .eq("video_id", v.id).eq("quantidade", qtd).eq("status", "pendente").eq("metodo", "manual").eq("valor", valor)
       .gt("expira_em", new Date().toISOString()).order("criado_em", { ascending: false }).limit(1).maybeSingle();
     if (aberto?.pix_copia_cola) {
       return json({ manual: true, pagamento_id: aberto.id, copia_cola: aberto.pix_copia_cola, chave: PIX_CHAVE, valor: aberto.valor, expira_em: aberto.expira_em, avisado: !!aberto.avisado_em });
@@ -149,7 +149,7 @@ Deno.serve(async (req) => {
 
     // reaproveita um Pix pendente ainda válido com a mesma quantidade (evita cobranças duplicadas)
     const { data: aberto } = await admin.from("pagamentos").select("id, pix_copia_cola, pix_qr_base64, valor, expira_em")
-      .eq("video_id", v.id).eq("quantidade", qtd).eq("status", "pendente").eq("metodo", "mp").gt("expira_em", new Date(Date.now() + 60_000).toISOString())
+      .eq("video_id", v.id).eq("quantidade", qtd).eq("status", "pendente").eq("metodo", "mp").eq("valor", valor).gt("expira_em", new Date(Date.now() + 60_000).toISOString())
       .order("criado_em", { ascending: false }).limit(1).maybeSingle();
     if (aberto?.pix_copia_cola) {
       return json({ pagamento_id: aberto.id, copia_cola: aberto.pix_copia_cola, qr_base64: aberto.pix_qr_base64, valor: aberto.valor, expira_em: aberto.expira_em });

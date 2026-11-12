@@ -222,9 +222,9 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       <div class="in">
         <div class="top"><h3 id="qtd-h">Quantos Reels prontos você quer?</h3><button class="btn small" type="button" id="qtd-fechar">Fechar</button></div>
         <p class="muted" style="margin:0;font-size:14px">A IA escolhe os melhores momentos do vídeo e entrega cada Reel em pé, com legenda animada, pronto para postar.</p>
-        <button class="btn small" type="button" data-q="1">1 Reel · R$ 8,99</button>
-        <button class="btn primary small" type="button" data-q="3">3 Reels · R$ 26,97</button>
-        <button class="btn small" type="button" data-q="5">5 Reels · R$ 44,95</button>
+        <button class="btn small" type="button" data-q="1">1 Reel · R$ 9,99</button>
+        <button class="btn primary small" type="button" data-q="3">3 Reels · R$ 29,97</button>
+        <button class="btn small" type="button" data-q="5">5 Reels · R$ 49,95</button>
       </div>
     </div>
     <div class="player hidden" id="pix" role="dialog" aria-modal="true" aria-labelledby="pix-h">
@@ -242,7 +242,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         <p class="muted" style="margin:0;font-size:13px">Pagou e não liberou? <a href="mailto:cortehype.app+suporte@gmail.com?subject=Suporte%20CorteHype%20-%20Pagamento" style="color:var(--score)">Fale com o suporte</a></p>
       </div>
     </div>
-    <footer>💚 0800: a IA assiste seu vídeo e mostra os melhores momentos — com nota viral, título e legenda — para você cortar. Está começando agora? Esse empurrão é por nossa conta. <span class="so-logado hidden">Quer tudo pronto? Reels para postar a partir de R$ 8,99 no Pix.</span><br>Suporte: <a href="mailto:cortehype.app+suporte@gmail.com" style="color:var(--score)">cortehype.app+suporte@gmail.com</a></footer>
+    <footer>💚 0800: a IA assiste seu vídeo e mostra os melhores momentos — com nota viral, título e legenda — para você cortar. Está começando agora? Esse empurrão é por nossa conta. <span class="so-logado hidden">Quer tudo pronto? Reels para postar a partir de R$ 9,99 no Pix.</span><br>Suporte: <a href="mailto:cortehype.app+suporte@gmail.com" style="color:var(--score)">cortehype.app+suporte@gmail.com</a></footer>
   </main>
 </div>
 
@@ -375,7 +375,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   }
   function chamarIA(corpo) { return chamarFn('analisar-video', corpo, 'Não foi possível falar com a IA agora.'); }
   var pixTimer = null;
-  var PRECO_REEL = 8.99;
+  var PRECO_REEL = 9.99;
   function reais(n) { return 'R$ ' + n.toFixed(2).replace('.', ','); }
   function escolherQtd() {
     return new Promise(function (ok) {
@@ -407,7 +407,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     if (r.pago) return true;
     if (r.manual) return pagarPixManual(r, c);
     return new Promise(function (ok) {
-      var v = Number(r.valor || valor || 8.99).toFixed(2).replace('.', ',');
+      var v = Number(r.valor || valor || 9.99).toFixed(2).replace('.', ',');
       $('pix-valor').textContent = 'R$ ' + v;
       $('pix-tit').textContent = c.titulo || 'Reel';
       $('pix-qr').src = r.qr_base64 ? 'data:image/png;base64,' + r.qr_base64 : '';

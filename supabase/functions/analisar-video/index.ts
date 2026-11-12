@@ -28,7 +28,7 @@ async function carregarChaves() {
 const KLAP = "https://api.klap.app/v2";
 const MAX_TENTATIVAS = 2;
 const REELS_PLANO = 5; // Reels prontos por link nos planos pagos
-const PRECO_REEL = Number(Deno.env.get("PRECO_REEL") ?? "8.99");
+const PRECO_REEL = 9.99;
 
 async function klap(path: string, body?: unknown) {
   const r = await fetch(KLAP + path, {
