@@ -412,7 +412,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       $('pix-tit').textContent = c.titulo || 'Reel';
       $('pix-qr').src = r.qr_base64 ? 'data:image/png;base64,' + r.qr_base64 : '';
       $('pix-qr').classList.toggle('hidden', !r.qr_base64);
-      $('pix-cc').value = r.copia_cola || '';
+      $('pix-cc').value = r.copia_cola || ''; $('pix-cc').onclick = function () { this.focus(); this.select(); try { this.setSelectionRange(0, this.value.length); } catch (e) {} };
       $('pix-st').textContent = '⏳ Aguardando o pagamento…'; $('pix-st').className = 'aviso';
       $('pix').classList.remove('hidden'); document.body.style.overflow = 'hidden';
       $('pix-copiar').onclick = function () { copiar(r.copia_cola || '', $('pix-copiar')); };
@@ -438,7 +438,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       $('pix-chave').innerHTML = 'Ou pague para a chave Pix (e-mail): <b></b> — no valor exato de <b></b>.';
       var bs = $('pix-chave').querySelectorAll('b'); bs[0].textContent = r.chave; bs[1].textContent = reais(Number(r.valor || 0));
       $('pix-chave').classList.remove('hidden');
-      $('pix-cc').value = r.copia_cola || '';
+      $('pix-cc').value = r.copia_cola || ''; $('pix-cc').onclick = function () { this.focus(); this.select(); try { this.setSelectionRange(0, this.value.length); } catch (e) {} };
       $('pix-copiar').onclick = function () { copiar(r.copia_cola || '', $('pix-copiar')); };
       var st = $('pix-st'), bt = $('pix-paguei');
       var esperando = function () { bt.classList.add('hidden'); st.className = 'aviso ok'; st.textContent = '✅ Recebemos seu aviso! Vamos conferir o Pix e liberar seus Reels — normalmente em poucos minutos. Pode fechar esta tela: o status aparece no seu vídeo.'; };
@@ -474,9 +474,9 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     var fim = function () { var o = btn.textContent; btn.textContent = 'Copiado ✓'; setTimeout(function () { btn.textContent = o; }, 1500); };
     // sem HTTPS o navigator.clipboard não existe: usa o jeito antigo, que funciona em qualquer site
     var antigo = function () {
-      var t = document.createElement('textarea'); t.value = txt; t.setAttribute('readonly', '');
-      t.style.position = 'fixed'; t.style.top = '0'; t.style.opacity = '0';
-      document.body.appendChild(t); t.focus(); t.select(); t.setSelectionRange(0, txt.length);
+      var t = document.createElement('textarea'); t.value = txt; t.contentEditable = 'true';
+      t.style.position = 'fixed'; t.style.top = '0'; t.style.left = '0'; t.style.width = '2em'; t.style.height = '2em'; t.style.fontSize = '16px'; t.style.opacity = '0.01';
+      document.body.appendChild(t); t.focus(); t.select(); try { t.setSelectionRange(0, txt.length); } catch (e) {}
       var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
       document.body.removeChild(t);
       if (ok) fim(); else prompt('Segure o texto abaixo e copie:', txt);
