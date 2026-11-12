@@ -16,7 +16,15 @@ const GEMINI_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const MODELOS = (Deno.env.get("GEMINI_MODEL") ??
   "gemini-3.7-flash,gemini-3.6-flash,gemini-3-flash-preview,gemini-2.5-flash").split(",").map((s) => s.trim()).filter(Boolean);
 const API = "https://generativelanguage.googleapis.com";
-const KLAP_KEY = Deno.env.get("KLAP_API_KEY") ?? "";
+let KLAP_KEY = Deno.env.get("KLAP_API_KEY") ?? "";
+// Se não estiver nos segredos, lê da tabela privada config_privada (só o servidor acessa)
+async function carregarChaves() {
+  if (KLAP_KEY) return;
+  try {
+    const { data } = await createClient(SUPABASE_URL, SERVICE_KEY).from("config_privada").select("valor").eq("chave", "KLAP_API_KEY").maybeSingle();
+    if (data?.valor) KLAP_KEY = String(data.valor).trim();
+  } catch (e) { console.error("config", e); }
+}
 const KLAP = "https://api.klap.app/v2";
 const MAX_TENTATIVAS = 2;
 const REELS_PLANO = 5; // Reels prontos por link nos planos pagos
@@ -216,6 +224,7 @@ async function analisar(admin: ReturnType<typeof createClient>, v: Record<string
 }
 
 Deno.serve(async (req) => {
+  await carregarChaves();
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ erro: "Use POST" }, 405);
 
