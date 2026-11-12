@@ -103,19 +103,36 @@ const SCHEMA = {
   required: ["clipes"],
 };
 
+const PRAZO_MS = 130_000; // a função tem tempo limitado: desiste antes e grava o erro
+let resolucaoBaixa = true; // vídeo em resolução baixa = análise bem mais rápida
+
 async function chamarGemini(videoPart: Record<string, unknown>) {
   let ultimoErro = "";
   let ocupado = false;
-  for (const modelo of MODELOS) {
-    const r = await fetch(`${API}/v1beta/models/${modelo}:generateContent`, {
-      method: "POST",
-      headers: { "x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [videoPart, { text: PROMPT }] }],
-        generationConfig: { responseMimeType: "application/json", responseSchema: SCHEMA, temperature: 0.4 },
-      }),
-    });
+  const fimPrazo = Date.now() + PRAZO_MS;
+  for (let i = 0; i < MODELOS.length; i++) {
+    const modelo = MODELOS[i];
+    const resta = fimPrazo - Date.now();
+    if (resta < 15_000) { ocupado = true; ultimoErro = ultimoErro || "timeout"; break; }
+    const cfg: Record<string, unknown> = { responseMimeType: "application/json", responseSchema: SCHEMA, temperature: 0.4 };
+    if (resolucaoBaixa) cfg.mediaResolution = "MEDIA_RESOLUTION_LOW";
+    let r: Response;
+    try {
+      r = await fetch(`${API}/v1beta/models/${modelo}:generateContent`, {
+        method: "POST",
+        headers: { "x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [videoPart, { text: PROMPT }] }], generationConfig: cfg }),
+        signal: AbortSignal.timeout(resta),
+      });
+    } catch (_e) {
+      ocupado = true;
+      ultimoErro = `${modelo}: timeout (a IA demorou demais)`;
+      break;
+    }
     const txt = await r.text();
+    if (r.status === 400 && resolucaoBaixa && /mediaResolution|media_resolution|Unknown name/i.test(txt)) {
+      resolucaoBaixa = false; i--; continue; // esta API não aceita: tenta de novo sem
+    }
     if (r.ok) {
       const j = JSON.parse(txt);
       const out = j?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? "").join("") ?? "";
@@ -215,13 +232,13 @@ async function analisar(admin: ReturnType<typeof createClient>, v: Record<string
   } catch (e) {
     const m = e instanceof Error ? e.message : String(e);
     console.error("analise falhou", v.id, m);
-    const amigavel = /429|quota|RESOURCE_EXHAUSTED|HTTP 50\d|high demand|overloaded/i.test(m)
+    const amigavel = /429|quota|RESOURCE_EXHAUSTED|HTTP 50\d|high demand|overloaded|timeout/i.test(m)
       ? "A IA está muito ocupada agora. Toque em \"Tentar de novo\" em alguns minutos."
       : /private|video unavailable|not accessible|PERMISSION_DENIED/i.test(m)
       ? "Não conseguimos acessar esse vídeo. Ele precisa ser público no YouTube."
       : /^Erro|^Não|^A IA|^Por enquanto|^Envio/.test(m) ? m : "Não conseguimos analisar este vídeo. Tente de novo.";
     // IA ocupada não é culpa do cliente: não gasta tentativa
-    const ocupada = /429|quota|RESOURCE_EXHAUSTED|HTTP 50\d|high demand|overloaded/i.test(m);
+    const ocupada = /429|quota|RESOURCE_EXHAUSTED|HTTP 50\d|high demand|overloaded|timeout/i.test(m);
     const extra = ocupada ? { tentativas: Number(v.tentativas ?? 0) } : {};
     await admin.from("videos").update({ status: "erro", erro_detalhe: amigavel, erro_tecnico: m.slice(0, 500), ...extra }).eq("id", v.id);
   } finally {
@@ -252,11 +269,12 @@ Deno.serve(async (req) => {
     if (!GEMINI_KEY) return json({ erro: "A análise automática ainda não foi configurada." }, 503);
     // trava: só pega vídeo do próprio usuário, que esteja na fila ou com erro, e marca como "analisando"
     const { data: v, error } = await admin.from("videos")
-      .update({ status: "analisando", erro_detalhe: null })
+      .update({ status: "analisando", erro_detalhe: null, analisando_desde: new Date().toISOString() })
       .eq("id", String(body.video_id ?? ""))
       .eq("usuario_id", u.user.id)
       .is("excluido_em", null)
-      .in("status", ["enviado", "erro"])
+      // na fila, com erro, ou "travado" analisando há mais de 4 minutos
+      .or(`status.in.(enviado,erro),and(status.eq.analisando,or(analisando_desde.is.null,analisando_desde.lt."${new Date(Date.now() - 240_000).toISOString()}"))`)
       .lt("tentativas", MAX_TENTATIVAS)
       .select("id, usuario_id, link_origem, caminho_arquivo, titulo, tentativas")
       .maybeSingle();

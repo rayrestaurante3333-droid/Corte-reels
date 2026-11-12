@@ -580,7 +580,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
   async function carregarVideos() {
     var pz = await sb.from('pagamentos').select('video_id').eq('status', 'pendente').not('avisado_em', 'is', null);
     var emConf = {}; (pz.data || []).forEach(function (x) { emConf[x.video_id] = true; });
-    var r = await sb.from('videos').select('id,titulo,link_origem,caminho_arquivo,canal_origem,status,erro_detalhe,criado_em,klap_status,reels_qtd,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset,legenda,hashtags,motivo,klap_project_id,video_url,origem)').is('excluido_em', null).order('criado_em', { ascending: false });
+    var r = await sb.from('videos').select('id,titulo,link_origem,caminho_arquivo,canal_origem,status,erro_detalhe,criado_em,analisando_desde,klap_status,reels_qtd,clipes(id,titulo,inicio_segundos,fim_segundos,nota_viral,preset,legenda,hashtags,motivo,klap_project_id,video_url,origem)').is('excluido_em', null).order('criado_em', { ascending: false });
     var el = $('videos'); el.innerHTML = '';
     if (!r.error) vigiar(r.data.filter(function (v) { return v.status === 'analisando' || ['pago', 'iniciando', 'gerando'].indexOf(v.klap_status) >= 0; }).map(function (v) { return v.id; }));
     if (r.error) { el.innerHTML = '<div class="empty">Não foi possível carregar seus vídeos agora.</div>'; return; }
@@ -596,14 +596,16 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       } else box.querySelector('.t').textContent = nomeV;
       box.querySelector('.muted').textContent = (v.canal_origem ? v.canal_origem + ' · ' : '') + new Date(v.criado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
       box.querySelector('.st').textContent = st[0];
-      if (v.status === 'analisando' || v.status === 'transcrevendo') {
+      var travado = v.status === 'analisando' && (Date.now() - new Date(v.analisando_desde || v.criado_em).getTime()) > 240000;
+      if ((v.status === 'analisando' || v.status === 'transcrevendo') && !travado) {
         var an = document.createElement('p'); an.className = 'aviso'; an.textContent = '🤖 A IA está assistindo seu vídeo e escolhendo os melhores cortes. Leva de 1 a 3 minutos — pode deixar esta tela aberta.';
         box.appendChild(an);
       }
-      if (v.status === 'enviado' || v.status === 'erro') {
+      if (travado) { var tv = document.createElement('p'); tv.className = 'aviso err'; tv.textContent = 'A IA demorou mais que o normal. Toque em "Tentar de novo" — não gasta sua vez.'; box.appendChild(tv); }
+      if (v.status === 'enviado' || v.status === 'erro' || travado) {
         if (v.status === 'erro' && v.erro_detalhe) { var er = document.createElement('p'); er.className = 'aviso err'; er.textContent = v.erro_detalhe; box.appendChild(er); }
         var go = document.createElement('button'); go.type = 'button'; go.className = 'btn primary small';
-        go.textContent = v.status === 'erro' ? 'Tentar de novo' : '✨ Analisar com IA';
+        go.textContent = (v.status === 'erro' || travado) ? 'Tentar de novo' : '✨ Analisar com IA';
         go.onclick = function () { go.disabled = true; go.textContent = 'Iniciando…'; analisarVideo(v.id); };
         box.appendChild(go);
       }
