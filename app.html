@@ -8,7 +8,7 @@
 <meta property="og:title" content="CorteHype · Cortes virais com IA — grátis">
 <meta property="og:description" content="Cole o link da sua live e a IA acha os momentos que podem viralizar. 0800, sem cartão.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://rayrestaurante3333-droid.github.io/Corte-reels/og.png">
+<meta property="og:image" content="https://cortehype.com.br/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -344,7 +344,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
 
   var MSG_LIMITE = 'O plano Grátis permite apenas 1 vídeo. Toque em "Ver planos" para enviar mais.';
   async function videosUsados() {
-    var q = sb.from('videos').select('id', { count: 'exact', head: true });
+    var q = sb.from('videos').select('id', { count: 'exact', head: true }).neq('status', 'erro');
     if (perfil.plano !== 'gratis') { var ini = new Date(); ini.setDate(1); ini.setHours(0, 0, 0, 0); q = q.gte('criado_em', ini.toISOString()); }
     var r = await q;
     return r.count || 0;
