@@ -208,7 +208,7 @@ async function analisar(admin: ReturnType<typeof createClient>, v: Record<string
     await admin.from("clipes").delete().eq("video_id", v.id).eq("origem", "ia");
     const ins = await admin.from("clipes").insert(clipes.map((c) => ({ ...c, video_id: v.id, usuario_id: v.usuario_id })));
     if (ins.error) throw new Error("Erro ao salvar os cortes: " + ins.error.message);
-    await admin.from("videos").update({ status: "pronto", erro_detalhe: null, analisado_em: new Date().toISOString() }).eq("id", v.id);
+    await admin.from("videos").update({ status: "pronto", erro_detalhe: null, erro_tecnico: null, analisado_em: new Date().toISOString() }).eq("id", v.id);
   } catch (e) {
     const m = e instanceof Error ? e.message : String(e);
     console.error("analise falhou", v.id, m);
@@ -217,7 +217,7 @@ async function analisar(admin: ReturnType<typeof createClient>, v: Record<string
       : /private|unavailable|not accessible|PERMISSION/i.test(m)
       ? "Não conseguimos acessar esse vídeo. Ele precisa ser público no YouTube."
       : /^Erro|^Não|^A IA|^Por enquanto|^Envio/.test(m) ? m : "Não conseguimos analisar este vídeo. Tente de novo.";
-    await admin.from("videos").update({ status: "erro", erro_detalhe: amigavel }).eq("id", v.id);
+    await admin.from("videos").update({ status: "erro", erro_detalhe: amigavel, erro_tecnico: m.slice(0, 500) }).eq("id", v.id);
   } finally {
     if (arquivoGemini) fetch(`${API}/v1beta/${arquivoGemini}`, { method: "DELETE", headers: { "x-goog-api-key": GEMINI_KEY } }).catch(() => {});
   }
