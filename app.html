@@ -344,7 +344,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
 
   var MSG_LIMITE = 'O plano Grátis permite apenas 1 vídeo. Toque em "Ver planos" para enviar mais.';
   async function videosUsados() {
-    var q = sb.from('videos').select('id', { count: 'exact', head: true }).neq('status', 'erro');
+    var q = sb.from('videos').select('id', { count: 'exact', head: true }).or('status.eq.pronto,and(excluido_em.is.null,status.neq.erro)');
     if (perfil.plano !== 'gratis') { var ini = new Date(); ini.setDate(1); ini.setHours(0, 0, 0, 0); q = q.gte('criado_em', ini.toISOString()); }
     var r = await q;
     return r.count || 0;
@@ -649,7 +649,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       montar(reels, '🎬 Seus Reels prontos para postar', true);
       var del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.textContent = 'Excluir vídeo';
       del.onclick = async function () {
-        var aviso = perfil.plano === 'gratis' ? '\n\nAtenção: no plano Grátis, excluir não libera um novo envio.' : '';
+        var aviso = perfil.plano === 'gratis' ? '\n\nAtenção: no plano Grátis, excluir um vídeo já analisado não libera um novo envio.' : '';
         if (!confirm('Excluir este vídeo da sua lista?' + aviso)) return;
         del.disabled = true;
         var x = await sb.from('videos').update({ excluido_em: new Date().toISOString() }).eq('id', v.id);
