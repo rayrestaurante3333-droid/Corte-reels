@@ -232,6 +232,14 @@ footer a{color:var(--score)}
 .preco li{list-style:none;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;font-size:15px}
 .preco li .v{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:var(--grad);color:#fff;font-size:12px;font-weight:700}
 
+
+/* resumo dos passos no topo */
+.trilha{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:22px;width:100%;max-width:560px;counter-reset:t}
+.trilha a{display:grid;justify-items:center;gap:6px;text-decoration:none;font-size:12px;line-height:1.2;color:var(--muted);padding:10px 2px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.trilha a b{width:26px;height:26px;border-radius:8px;background:var(--grad);color:#fff;display:grid;place-items:center;font:700 12px var(--mono)}
+.trilha a span{font-size:18px}
+.trilha-tit{font:700 11px var(--mono);letter-spacing:.12em;color:var(--muted);margin-top:26px;text-transform:uppercase}
+
 /* vídeo demonstração */
 .demo{display:grid;gap:22px;align-items:center}
 @media (min-width:860px){.demo{grid-template-columns:1fr 1fr}}
@@ -275,7 +283,7 @@ footer a{color:var(--score)}
         <button class="play" id="playSom" type="button" aria-label="Assistir o vídeo com som"><i></i>Assistir com som<span class="som">🔊 20 SEGUNDOS</span></button>
         <div class="prog" aria-hidden="true"><b id="progBar"></b></div>
       </div>
-      <p class="sub">O CorteHype é uma IA que assiste sua live ou vídeo do YouTube e entrega os momentos com mais chance de bombar — com nota viral, título e legenda prontos para postar.</p>
+      <p class="sub">Você cola o link de um vídeo do YouTube. A IA assiste tudo e entrega os momentos com mais chance de bombar, com nota viral, título e legenda. Pegue grátis, sem edição, ou com edição, já pronto para postar.</p>
       <div class="ctas">
         <a class="btn primary" href="app.html?criar">Começar grátis</a>
         <a class="btn" href="#como">Como funciona</a>
@@ -285,6 +293,14 @@ footer a{color:var(--score)}
         <span class="selo"><b>✓</b> 100% em português</span>
         <span class="selo"><b>✓</b> Feito para iniciantes</span>
       </div>
+      <p class="trilha-tit">Como funciona, em resumo</p>
+      <nav class="trilha" aria-label="Os 5 passos">
+        <a href="#como"><b>1</b><span>🔗</span>Copie o link</a>
+        <a href="#como"><b>2</b><span>📋</span>Cole no app</a>
+        <a href="#como"><b>3</b><span>🤖</span>A IA corta</a>
+        <a href="#como"><b>4</b><span>👆</span>Escolha</a>
+        <a href="#como"><b>5</b><span>🚀</span>Poste</a>
+      </nav>
     </div>
   </section>
 
@@ -466,6 +482,9 @@ footer a{color:var(--score)}
       <div class="faq">
         <details><summary>É grátis mesmo?</summary><p>Sim. Você cria a conta sem cartão e a IA analisa seus vídeos de graça, quantos você quiser. Você só paga se quiser o Reel já editado: R$ 9,99 por Reel, no Pix.</p></details>
         <details><summary>Funciona só com o celular?</summary><p>Sim. O CorteHype funciona no navegador do celular, sem instalar nada. Também dá para usar no computador.</p></details>
+        <details><summary>Quanto tempo demora?</summary><p>A IA leva de 1 a 3 minutos para achar os cortes. Se você pedir o Reel com edição, ele fica pronto de 3 a 10 minutos depois do Pix.</p></details>
+        <details><summary>Qual a diferença entre com e sem edição?</summary><p><b>Sem edição (grátis):</b> você recebe o minuto exato de cada corte, com título, legenda e hashtags, e corta no app que preferir. <b>Com edição (R$ 9,99 por Reel):</b> você recebe o Reel em pé, já cortado e com legenda animada na tela, pronto para postar.</p></details>
+        <details><summary>Onde eu posto os cortes?</summary><p>Onde você preferir: Instagram Reels, TikTok e YouTube Shorts. É só baixar e postar.</p></details>
         <details><summary>Preciso saber editar vídeo?</summary><p>Não. A IA te entrega os melhores trechos com o minuto exato, título e legenda. Se quiser, dentro do app também dá para pedir os Reels já prontos para postar.</p></details>
         <details><summary>Funciona com live longa?</summary><p>Sim. Lives e podcasts de várias horas funcionam — é justamente onde estão os melhores cortes.</p></details>
         <details><summary>Posso cortar vídeo de qualquer canal?</summary><p>Não. Só vídeos seus ou que o dono autorizou. Antes de cada vídeo o app confere de qual canal ele é, para proteger você e o seu perfil.</p></details>
