@@ -128,5 +128,22 @@ footer{font-size:13px;color:var(--muted);text-align:center}
 
   <footer>CorteHype · cortes virais com IA, em português<br>Dúvidas ou suporte: <a href="mailto:cortehype.app+suporte@gmail.com" style="color:var(--score)">cortehype.app+suporte@gmail.com</a></footer>
 </main>
+<!-- Chat MyChatBot (atendimento CorteHype) -->
+<link rel="stylesheet" href="https://storage.googleapis.com/mychatbot-widget-assets/v1/style.css" />
+<script src="https://storage.googleapis.com/mychatbot-widget-assets/v1/widget.js"></script>
+<div id="my-chat-widget-container"></div>
+<script>
+  MyChatBot.mount('#my-chat-widget-container', {
+    account_id: "83c5131a-6f83-4cfb-a795-e106eaf704a4",
+    widget_id: "cortehype-site",
+    api_url: 'https://api.mychatbot.app',
+    assistant_name: "CorteHype",
+    color: "#FF2D3F",
+    lang: 'en',
+    ad_widget_title: 'Fale com o CorteHype',
+    ad_widget_description: 'Tire suas dúvidas sobre os cortes com IA',
+    ad_popup_messages: ['👋 Quer transformar seu vídeo em reels virais? Me pergunte!']
+  });
+</script>
 </body>
 </html>
