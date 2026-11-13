@@ -108,7 +108,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
 <div class="wrap">
   <header class="top">
     <a class="logo" href="./"><img src="logo.png" alt="CorteHype" height="40" style="height:40px;width:auto;display:block"></a>
-    <div style="display:flex;gap:8px"><a class="btn small" href="mailto:cortehype.app+suporte@gmail.com?subject=Suporte%20CorteHype">💬 Suporte</a>
+    <div style="display:flex;gap:8px"><a class="btn small" href="mailto:cortehype.appsupote@gmail.com?subject=Suporte%20CorteHype">💬 Suporte</a>
     <button class="btn small hidden" id="sair" type="button">Sair</button></div>
   </header>
 
@@ -239,10 +239,10 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         <button class="btn primary small" type="button" id="pix-copiar">Copiar código Pix</button>
         <button class="btn primary small hidden" type="button" id="pix-paguei">✅ Já paguei</button>
         <p class="aviso" id="pix-st" role="status"></p>
-        <p class="muted" style="margin:0;font-size:13px">Pagou e não liberou? <a href="mailto:cortehype.app+suporte@gmail.com?subject=Suporte%20CorteHype%20-%20Pagamento" style="color:var(--score)">Fale com o suporte</a></p>
+        <p class="muted" style="margin:0;font-size:13px">Pagou e não liberou? <a href="mailto:cortehype.appsupote@gmail.com?subject=Suporte%20CorteHype%20-%20Pagamento" style="color:var(--score)">Fale com o suporte</a></p>
       </div>
     </div>
-    <footer>💚 0800: a IA assiste seu vídeo e mostra os melhores momentos — com nota viral, título e legenda — para você cortar. Está começando agora? Esse empurrão é por nossa conta. <span class="so-logado hidden">Quer tudo pronto? Reels para postar a partir de R$ 9,99 no Pix.</span><br>Suporte: <a href="mailto:cortehype.app+suporte@gmail.com" style="color:var(--score)">cortehype.app+suporte@gmail.com</a></footer>
+    <footer>💚 0800: a IA assiste seu vídeo e mostra os melhores momentos — com nota viral, título e legenda — para você cortar. Está começando agora? Esse empurrão é por nossa conta. <span class="so-logado hidden">Quer tudo pronto? Reels para postar a partir de R$ 9,99 no Pix.</span><br>Suporte: <a href="mailto:cortehype.appsupote@gmail.com" style="color:var(--score)">cortehype.appsupote@gmail.com</a></footer>
   </main>
 </div>
 
@@ -649,7 +649,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
           bt.onclick = function () { pedirReels(v, bt); };
           oferta.appendChild(bt); box.appendChild(oferta);
         } else if (ks === 'erro') {
-          var e2 = document.createElement('p'); e2.className = 'aviso err'; e2.textContent = 'Não conseguimos gerar os Reels deste vídeo. Escreva para cortehype.app+suporte@gmail.com para receber seu dinheiro de volta.'; box.appendChild(e2);
+          var e2 = document.createElement('p'); e2.className = 'aviso err'; e2.textContent = 'Não conseguimos gerar os Reels deste vídeo. Escreva para cortehype.appsupote@gmail.com para receber seu dinheiro de volta.'; box.appendChild(e2);
         } else if (ks !== 'pronto') {
           var e3 = document.createElement('p'); e3.className = 'aviso'; e3.textContent = (ks === 'pago' ? '✅ Pagamento confirmado! ' : '') + '🎬 Seus ' + (v.reels_qtd || '') + ' Reels prontos estão sendo feitos. Você pode sair e voltar depois.'; box.appendChild(e3);
         }
