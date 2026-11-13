@@ -12,12 +12,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#0e0d12">
+<meta name="theme-color" content="#09090b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Albert+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0e0d12;--panel:#18161f;--line:#2a2733;--ink:#f3f0f7;--muted:#a39fae;--rec:#ff3b5c;--score:#ffb627;--ok:#2ec4b6;
+:root{--bg:#09090b;--panel:#131316;--line:#24242b;--ink:#fafafa;--muted:#a1a1aa;--rec:#ff2d3f;--score:#ff8a1f;--ok:#22c55e;--grad:linear-gradient(90deg,#ff2d3f,#ff7a1a);
 --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;--body:"Albert Sans","Segoe UI",Roboto,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;color-scheme:dark}
 *{box-sizing:border-box}html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);-webkit-font-smoothing:antialiased}
@@ -30,7 +30,7 @@ p{margin:0}
 @keyframes blink{50%{opacity:.25}}
 @media (prefers-reduced-motion:reduce){.logo .dot{animation:none}}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 16px/1 var(--body);padding:15px 20px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;text-decoration:none;text-align:center}
-.btn.primary{background:var(--rec);border-color:var(--rec);color:#fff}
+.btn.primary{background:var(--grad);border-color:transparent;color:#fff}
 .btn.small{padding:10px 14px;font-size:14px}
 .btn:focus-visible,a:focus-visible{outline:3px solid var(--score);outline-offset:2px}
 .eyebrow{font:500 12px var(--mono);color:var(--score);letter-spacing:.08em;text-transform:uppercase}

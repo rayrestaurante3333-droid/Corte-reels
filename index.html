@@ -16,12 +16,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#0e0d12">
+<meta name="theme-color" content="#09090b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Albert+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0e0d12;--panel:#18161f;--line:#2a2733;--ink:#f3f0f7;--muted:#a39fae;--rec:#ff3b5c;--score:#ffb627;--ok:#2ec4b6;
+:root{--bg:#09090b;--panel:#131316;--line:#24242b;--ink:#fafafa;--muted:#a1a1aa;--rec:#ff2d3f;--score:#ff8a1f;--ok:#22c55e;--grad:linear-gradient(90deg,#ff2d3f,#ff7a1a);
 --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;--body:"Albert Sans","Segoe UI",Roboto,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;color-scheme:dark}
 *{box-sizing:border-box}html,body{margin:0}html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
@@ -31,7 +31,7 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;line-height:.92;mar
 p{margin:0}
 a{color:inherit}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 16px/1 var(--body);padding:16px 22px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);text-decoration:none;text-align:center}
-.btn.primary{background:var(--rec);border-color:var(--rec);color:#fff;box-shadow:0 8px 30px -8px rgba(255,59,92,.6)}
+.btn.primary{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 10px 30px -10px rgba(255,45,63,.55)}
 .btn.small{padding:10px 14px;font-size:14px}
 .btn:hover{filter:brightness(1.1)}
 .btn:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--score);outline-offset:2px}
@@ -39,19 +39,19 @@ a{color:inherit}
 .muted{color:var(--muted)}
 
 /* topo */
-.nav{position:sticky;top:0;z-index:10;background:rgba(14,13,18,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(42,39,51,.6)}
+.nav{position:sticky;top:0;z-index:10;background:rgba(9,9,11,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(42,39,51,.6)}
 .nav .wrap{display:flex;justify-content:space-between;align-items:center;height:64px;gap:12px}
 .nav img{height:36px;width:auto;display:block}
 .nav .acoes{display:flex;gap:8px}
 
 /* hero */
 .hero{padding:44px 0 56px;position:relative;overflow:hidden}
-.hero::before{content:"";position:absolute;inset:-20% -10% auto auto;width:520px;height:520px;background:radial-gradient(circle,rgba(255,59,92,.22),transparent 65%);pointer-events:none}
-.hero::after{content:"";position:absolute;inset:auto auto -30% -15%;width:480px;height:480px;background:radial-gradient(circle,rgba(255,182,39,.12),transparent 65%);pointer-events:none}
+.hero::before{content:"";position:absolute;inset:-20% -10% auto auto;width:520px;height:520px;background:radial-gradient(circle,rgba(255,45,63,.22),transparent 65%);pointer-events:none}
+.hero::after{content:"";position:absolute;inset:auto auto -30% -15%;width:480px;height:480px;background:radial-gradient(circle,rgba(255,138,31,.12),transparent 65%);pointer-events:none}
 .hero .grid{display:grid;gap:36px;align-items:center;position:relative;z-index:1}
 @media (min-width:860px){.hero .grid{grid-template-columns:1.1fr .9fr}}
 .hero h1{font-size:clamp(52px,13vw,96px)}
-.hero h1 em{font-style:normal;color:var(--rec)}
+.hero h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero h1 .z{color:var(--score)}
 .hero .sub{font-size:18px;color:var(--muted);max-width:520px;margin-top:16px}
 .hero .ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
@@ -70,7 +70,7 @@ a{color:inherit}
 .mini .n{grid-row:span 2;font:700 24px var(--mono);color:var(--score)}
 .mini b{font-size:13px;line-height:1.25}
 .mini span{font:500 11px var(--mono);color:var(--muted)}
-.mini.top{border-color:var(--score);box-shadow:0 0 0 1px rgba(255,182,39,.25)}
+.mini.top{border-color:var(--score);box-shadow:0 0 0 1px rgba(255,138,31,.25)}
 .fone .bt{margin-top:10px;width:100%;padding:12px;border-radius:10px;background:var(--rec);color:#fff;font-weight:700;font-size:14px;text-align:center}
 
 /* seções */
@@ -136,7 +136,7 @@ footer a{color:var(--score)}
         <h1>Sua live vira <em>Reels virais.</em> <span class="z">0800.</span></h1>
         <p class="sub">Cole o link da sua live ou vídeo do YouTube. Em 2 minutos a IA assiste tudo e mostra os momentos com mais chance de bombar — com nota viral, título e legenda prontos para postar.</p>
         <div class="ctas">
-          <a class="btn primary" href="app.html?criar">Começar grátis 🚀</a>
+          <a class="btn primary" href="app.html?criar">Começar grátis</a>
           <a class="btn" href="#exemplo">Ver um exemplo</a>
         </div>
         <div class="selos" aria-label="Vantagens">
@@ -240,9 +240,9 @@ footer a{color:var(--score)}
 
   <section class="s">
     <div class="wrap final">
-      <h2>Bora fazer sua live<br><em>bombar?</em></h2>
+      <h2>Pronto para fazer sua live<br><em>viralizar?</em></h2>
       <p class="muted">Crie sua conta em 1 minuto. Sem cartão.</p>
-      <a class="btn primary" href="app.html?criar">Começar grátis agora 🚀</a>
+      <a class="btn primary" href="app.html?criar">Começar grátis agora</a>
     </div>
   </section>
 </main>
