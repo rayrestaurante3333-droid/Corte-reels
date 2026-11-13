@@ -115,6 +115,12 @@ details p{margin-top:8px;color:var(--muted);font-size:15px}
 .final h2 em{font-style:normal;color:var(--rec)}
 footer{border-top:1px solid var(--line);padding:26px 0 40px;font-size:13px;color:var(--muted);text-align:center}
 footer a{color:var(--score)}
+
+/* vídeo demonstração */
+.demo{display:grid;gap:22px;align-items:center}
+@media (min-width:860px){.demo{grid-template-columns:1fr 1fr}}
+.demo video{justify-self:center;width:100%;max-width:330px;aspect-ratio:9/16;border-radius:28px;border:1px solid var(--line);background:#000;box-shadow:0 30px 80px -30px rgba(0,0,0,.8),0 0 0 6px #1d1a24;display:block}
+.demo .ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
 </style>
 </head>
 <body>
@@ -137,7 +143,7 @@ footer a{color:var(--score)}
         <p class="sub">Cole o link da sua live ou vídeo do YouTube. Em 2 minutos a IA assiste tudo e mostra os momentos com mais chance de bombar — com nota viral, título e legenda prontos para postar.</p>
         <div class="ctas">
           <a class="btn primary" href="app.html?criar">Começar grátis</a>
-          <a class="btn" href="#exemplo">Ver um exemplo</a>
+          <a class="btn" href="#video">▶ Ver como funciona</a>
         </div>
         <div class="selos" aria-label="Vantagens">
           <span class="selo"><b>✓</b> Sem cartão</span>
@@ -153,6 +159,18 @@ footer a{color:var(--score)}
         <div class="mini"><span class="n">85</span><b>Teoria: o final do GTA 6</b><span>01:45:03 → 01:45:58</span></div>
         <div class="bt">Ver meus cortes</div>
       </div>
+    </div>
+  </section>
+
+  <section class="s" id="video">
+    <div class="wrap demo">
+      <div>
+        <p class="eyebrow">● Veja antes de criar sua conta</p>
+        <h2>Como funciona<br>em 20 segundos</h2>
+        <p class="intro">Você cola o link do YouTube, a IA encontra os momentos virais e você recebe os cortes prontos para postar no Reels, TikTok e Shorts.</p>
+        <div class="ctas"><a class="btn primary" href="app.html?criar">Começar grátis</a></div>
+      </div>
+      <video src="videos/como-funciona.mp4" poster="videos/como-funciona.jpg" controls playsinline muted autoplay loop preload="metadata" aria-label="Vídeo mostrando como o CorteHype funciona"></video>
     </div>
   </section>
 
