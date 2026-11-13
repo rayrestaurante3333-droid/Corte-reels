@@ -136,6 +136,102 @@ footer a{color:var(--score)}
 .palco .prog b{display:block;height:100%;width:0;background:var(--grad)}
 .palco.tocando .play{display:none}
 
+
+/* acento cursivo geral */
+.cur{font-family:"Instrument Serif",Georgia,serif;font-style:italic;text-transform:none;font-weight:400;letter-spacing:0;font-size:1.12em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;padding:0 .06em}
+.centro{text-align:center}.centro .intro{margin-left:auto;margin-right:auto}
+/* menu */
+.menu-bt{width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.menu-bt span,.menu-bt span::before,.menu-bt span::after{display:block;width:18px;height:2px;background:currentColor;position:relative;content:""}
+.menu-bt span::before{position:absolute;top:-6px}.menu-bt span::after{position:absolute;top:6px}
+@media (max-width:520px){.nav .acoes .esconde{display:none}}
+.gaveta{position:fixed;inset:0;z-index:50;display:none}
+.gaveta.aberta{display:block}
+.gaveta .fundo{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.gaveta nav{position:absolute;top:0;right:0;bottom:0;width:min(82vw,360px);background:#111014;border-left:1px solid var(--line);padding:16px 22px;display:flex;flex-direction:column;animation:entra .25s ease}
+@keyframes entra{from{transform:translateX(40px);opacity:0}}
+.gaveta .topo{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.gaveta .topo img{height:32px}
+.gaveta a.item{display:block;padding:20px 2px;border-bottom:1px solid var(--line);font-size:22px;text-decoration:none}
+.gaveta .btn{margin-top:26px}
+/* precisa */
+.precisa{display:grid;gap:12px;margin-top:28px;text-align:left}
+@media (min-width:760px){.precisa{grid-template-columns:repeat(3,1fr)}}
+.precisa div{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:start}
+.precisa .ic{grid-row:span 3;width:56px;height:56px;border-radius:16px;border:1px solid var(--line);background:#1a171f;display:grid;place-items:center;font-size:26px}
+.precisa b{font-size:20px}
+.precisa small{font:700 11px var(--mono);letter-spacing:.12em;color:var(--rec);text-transform:uppercase}
+.precisa span{color:var(--muted);font-size:15px}
+.nota-p{color:var(--muted);font-size:14px;margin-top:16px}
+/* passos grandes */
+.passo2{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:24px;margin-top:16px;display:grid;gap:12px}
+@media (min-width:860px){.passo2{grid-template-columns:1fr 1fr;align-items:center;gap:30px;padding:34px}}
+.passo2 .k2{font:700 14px var(--mono);letter-spacing:.16em;color:var(--rec)}
+.passo2 h3{font-size:clamp(32px,8vw,44px)}
+.passo2 p{color:var(--muted);font-size:16px}
+.tela{background:#0d0c10;border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:10px;font-size:14px}
+.tela .lb{font:700 11px var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.tela .campo{border:1px solid var(--line);border-radius:10px;padding:12px;background:#141218;font-family:var(--mono);font-size:13px;color:#e4e4e7;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.tela .bt2{background:var(--grad);border-radius:10px;padding:12px;text-align:center;font-weight:700;color:#fff}
+.barra2{height:10px;border-radius:99px;background:#24222a;overflow:hidden}.barra2 b{display:block;height:100%;width:72%;background:var(--grad);animation:enche 3s ease-in-out infinite alternate}
+@keyframes enche{from{width:18%}to{width:92%}}
+.tela .linha{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:13px}
+.tela .linha b{color:var(--ink)}
+.corte{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#141218}
+.corte .n{font:700 22px var(--mono);color:var(--score)}
+.corte b{font-size:13px;line-height:1.25;display:block}.corte i{font:500 11px var(--mono);color:var(--muted);font-style:normal}
+.corte .cp{font:700 10px var(--mono);border:1px solid var(--line);border-radius:6px;padding:6px 8px;color:var(--muted)}
+.corte.top{border-color:var(--score)}
+/* painel com etapas */
+.janela{margin-top:26px;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#0d0c10;text-align:left}
+.janela .cab{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line);color:var(--muted);font-size:14px}
+.janela .cab i{width:11px;height:11px;border-radius:50%;background:#3f3f46}
+.janela .corpo{padding:20px}
+.janela .meta{font:700 11px var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.janela h3{font-family:var(--body);text-transform:none;font-size:28px;font-weight:700;margin:6px 0 10px}
+.esp{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--rec);color:var(--rec);font:700 11px var(--mono);letter-spacing:.12em;padding:7px 12px;border-radius:8px}
+.esp::before{content:"";width:7px;height:7px;background:var(--rec);border-radius:2px;animation:pisca 1.4s steps(2) infinite}
+.etapas{display:grid;grid-template-columns:repeat(4,1fr);margin-top:18px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.etapas button{background:transparent;border:0;border-right:1px solid var(--line);color:var(--ink);padding:14px 4px;display:grid;justify-items:center;gap:8px;font:700 13px var(--body);cursor:pointer;border-bottom:3px solid transparent}
+.etapas button:last-child{border-right:0}
+.etapas button i{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font:700 13px var(--mono);font-style:normal;border:1px solid var(--line);color:var(--muted)}
+.etapas button.feito i{background:var(--grad);border-color:transparent;color:#fff}
+.etapas button.ativo{background:#1a1720;border-bottom-color:var(--rec)}
+.etapas button.ativo i{background:var(--rec);border-color:transparent;color:#fff}
+.painel-et{margin-top:14px;border:1px solid var(--line);border-radius:14px;padding:16px;display:none;gap:10px}
+.painel-et.ativo{display:grid}
+.painel-et p{color:var(--muted);font-size:15px}
+.acoes2{display:grid;gap:10px;margin-top:6px}
+.acoes2 a{text-align:center;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;border:1px solid var(--line)}
+.acoes2 a.pri{background:var(--grad);border-color:transparent;color:#fff}
+/* comparação */
+.comp{display:grid;gap:14px;margin-top:28px;text-align:left}
+@media (min-width:860px){.comp{grid-template-columns:1fr 1fr}}
+.comp .cx{border:1px solid var(--line);border-radius:20px;padding:22px;background:var(--panel)}
+.comp .cx.bom{border-color:rgba(255,45,63,.55);background:linear-gradient(180deg,rgba(255,45,63,.10),var(--panel) 45%)}
+.comp .cxh{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.comp .cxh b{font-size:24px}.comp .cxh img{height:30px}
+.comp .cxh small{font:700 11px var(--mono);letter-spacing:.12em;color:var(--muted)}
+.comp .cx.bom .cxh small{color:var(--score)}
+.comp li{list-style:none;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);font-size:16px}
+.comp li:last-child{border-bottom:0}
+.comp ul{margin:0;padding:0}
+.comp .x{width:24px;height:24px;border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;color:var(--muted);font-size:13px}
+.comp .cx:not(.bom) li{color:var(--muted)}
+.comp .v{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;background:var(--grad);color:#fff;font-size:13px;font-weight:700}
+.frase{font-size:clamp(20px,5vw,26px);font-weight:700;margin-top:14px;max-width:700px;margin-left:auto;margin-right:auto}
+/* preço */
+.precos{display:grid;gap:14px;margin-top:28px;text-align:left}
+@media (min-width:760px){.precos{grid-template-columns:1fr 1fr}}
+.preco{border:1px solid var(--line);border-radius:20px;padding:24px;background:var(--panel);display:grid;gap:14px;align-content:start;position:relative}
+.preco.dest{border-color:var(--score)}
+.preco .tag{position:absolute;top:-12px;right:18px;background:var(--grad);color:#fff;font:700 11px var(--mono);letter-spacing:.1em;padding:6px 10px;border-radius:8px}
+.preco h3{font-size:30px}
+.preco .val{font:700 44px/1 var(--mono)}.preco .val small{display:block;margin-top:8px;font-size:14px;color:var(--muted);font-weight:500}
+.preco ul{margin:0;padding:0;display:grid;gap:10px}
+.preco li{list-style:none;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;font-size:15px}
+.preco li .v{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:var(--grad);color:#fff;font-size:12px;font-weight:700}
+
 /* vídeo demonstração */
 .demo{display:grid;gap:22px;align-items:center}
 @media (min-width:860px){.demo{grid-template-columns:1fr 1fr}}
@@ -148,11 +244,25 @@ footer a{color:var(--score)}
   <div class="wrap">
     <a href="./" aria-label="CorteHype, início"><img src="logo.png" alt="CorteHype"></a>
     <div class="acoes">
-      <a class="btn small" href="app.html">Entrar</a>
+      <a class="btn small esconde" href="app.html">Entrar</a>
       <a class="btn small primary" href="app.html?criar">Criar conta</a>
+      <button class="menu-bt" id="abreMenu" type="button" aria-label="Abrir menu" aria-expanded="false"><span></span></button>
     </div>
   </div>
 </header>
+
+<div class="gaveta" id="gaveta" aria-hidden="true">
+  <div class="fundo" data-fecha></div>
+  <nav aria-label="Menu">
+    <div class="topo"><img src="logo.png" alt="CorteHype"><button class="menu-bt" data-fecha type="button" aria-label="Fechar menu">✕</button></div>
+    <a class="item" href="#como" data-fecha>Como funciona</a>
+    <a class="item" href="#app" data-fecha>O app</a>
+    <a class="item" href="#preco" data-fecha>Preço</a>
+    <a class="item" href="#duvidas" data-fecha>Dúvidas</a>
+    <a class="item" href="app.html" data-fecha>Entrar</a>
+    <a class="btn primary" href="app.html?criar">Quero o CorteHype ↗</a>
+  </nav>
+</div>
 
 <main>
   <section class="hero2" id="video">
@@ -180,7 +290,7 @@ footer a{color:var(--score)}
   <section class="s">
     <div class="wrap">
       <p class="eyebrow">Por que usar</p>
-      <h2>Menos edição.<br>Mais alcance.</h2>
+      <h2>Menos edição.<br>Mais <span class="cur">alcance.</span></h2>
       <p class="intro">Você grava horas de conteúdo, mas não tem tempo de assistir tudo de novo para achar o melhor trecho. O CorteHype faz isso por você.</p>
       <div class="num">
         <div><b>2 min</b><span>para analisar o seu vídeo</span></div>
@@ -191,14 +301,71 @@ footer a{color:var(--score)}
     </div>
   </section>
 
+  <section class="s centro">
+    <div class="wrap">
+      <p class="eyebrow">■ Do que você precisa</p>
+      <h2>Só precisa do seu <span class="cur">celular.</span></h2>
+      <p class="intro">Nada de computador potente ou programa para instalar. O CorteHype funciona no navegador do celular. Para começar, você precisa de três coisas:</p>
+      <div class="precisa">
+        <div><span class="ic">📱</span><b>Um celular</b><small>Onde tudo acontece</small><span>Android ou iPhone. Se preferir, também funciona no computador.</span></div>
+        <div><span class="ic">▶️</span><b>Um vídeo no YouTube</b><small>A matéria-prima</small><span>Sua live, podcast ou vídeo, público ou não listado.</span></div>
+        <div><span class="ic">✂️</span><b>Uma conta grátis</b><small>Leva 1 minuto</small><span>Só e-mail e senha. Sem cartão de crédito.</span></div>
+      </div>
+      <p class="nota-p">Pronto. Você não precisa de nada além disso.</p>
+    </div>
+  </section>
+
   <section class="s" id="como">
     <div class="wrap">
-      <p class="eyebrow">Como funciona</p>
-      <h2>3 passos.<br>Sem complicação.</h2>
-      <div class="passos">
-        <div class="passo"><span class="k">1</span><h3>Cole o link</h3><p>Crie sua conta grátis e cole o link da sua live, podcast ou vídeo do YouTube.</p></div>
-        <div class="passo"><span class="k">2</span><h3>A IA assiste</h3><p>Em 1 a 3 minutos ela encontra os momentos mais fortes: ganchos, reações, polêmicas e risadas.</p></div>
-        <div class="passo"><span class="k">3</span><h3>Poste e cresça</h3><p>Receba título, legenda, hashtags e o minuto exato de cada corte. É só postar no Reels, TikTok e Shorts.</p></div>
+      <div class="centro">
+        <p class="eyebrow">■ Como funciona</p>
+        <h2>Do link ao Reel em <span class="cur">3 passos.</span></h2>
+      </div>
+      <div class="passo2">
+        <div><p class="k2">PASSO 01</p><h3>Cole o link</h3><p>Crie sua conta grátis e cole o link da sua live, podcast ou vídeo do YouTube. Só isso.</p></div>
+        <div class="tela"><span class="lb">Link do vídeo</span><div class="campo">https://youtube.com/live/minha-live-gta6</div><div class="bt2">✂️ Achar os melhores cortes</div></div>
+      </div>
+      <div class="passo2">
+        <div><p class="k2">PASSO 02</p><h3>A IA assiste tudo</h3><p>Em 1 a 3 minutos ela assiste o vídeo inteiro e encontra os momentos mais fortes: ganchos, reações, polêmicas e risadas.</p></div>
+        <div class="tela"><span class="lb">● IA analisando</span><div class="linha"><span>live_gta6 · 2h14</span><b>72%</b></div><div class="barra2"><b></b></div><div class="linha"><span>Momentos encontrados</span><b>4 cortes 🔥</b></div><div class="linha"><span>Tempo</span><b>≈ 2 min</b></div></div>
+      </div>
+      <div class="passo2">
+        <div><p class="k2">PASSO 03</p><h3>Escolha e poste</h3><p>Cada corte vem com nota viral, título, legenda e hashtags. Copie e poste no Reels, TikTok e Shorts, ou peça o Reel pronto.</p></div>
+        <div class="tela"><span class="lb">Seus cortes · do melhor ao pior</span>
+          <div class="corte top"><span class="n">94</span><span><b>Fugi da polícia com 1% de vida 😱</b><i>01:12:40 → 01:13:25</i></span><span class="cp">COPIAR</span></div>
+          <div class="corte"><span class="n">89</span><span><b>O chat escolheu e deu ruim</b><i>00:34:10 → 00:34:52</i></span><span class="cp">COPIAR</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="s centro" id="app">
+    <div class="wrap">
+      <p class="eyebrow">■ O app</p>
+      <h2>Você não edita.<br>Você <span class="cur">escolhe.</span></h2>
+      <p class="intro">O CorteHype mostra cada etapa e você decide o que postar. Toque nas etapas para ver.</p>
+      <div class="janela">
+        <div class="cab"><i></i><i></i><i></i><span style="margin-left:8px">App do CorteHype</span></div>
+        <div class="corpo">
+          <p class="meta">Live de GTA 6 · 2h14 · análise grátis</p>
+          <h3>Fugi da polícia com 1% de vida</h3>
+          <span class="esp">ESPERANDO VOCÊ</span>
+          <div class="etapas" role="tablist">
+            <button class="feito" data-et="0" type="button"><i>✓</i>Link</button>
+            <button class="feito" data-et="1" type="button"><i>✓</i>Análise</button>
+            <button class="ativo" data-et="2" type="button"><i>3</i>Cortes</button>
+            <button data-et="3" type="button"><i>4</i>Pronto</button>
+          </div>
+          <div class="painel-et" data-p="0"><div class="tela"><span class="lb">O link</span><div class="campo">https://youtube.com/live/minha-live-gta6</div></div><p>O app confere se o vídeo é seu antes de começar, para proteger o seu perfil.</p></div>
+          <div class="painel-et" data-p="1"><div class="tela"><div class="linha"><span>Vídeo assistido</span><b>2h14 · 100%</b></div><div class="barra2"><b style="width:100%;animation:none"></b></div><div class="linha"><span>Momentos com chance de viralizar</span><b>4</b></div></div><p>A IA assistiu tudo em cerca de 2 minutos. Grátis e sem limite.</p></div>
+          <div class="painel-et ativo" data-p="2"><div class="tela"><span class="lb">Os cortes · nota viral de 0 a 100</span>
+            <div class="corte top"><span class="n">94</span><span><b>Fugi da polícia com 1% de vida 😱</b><i>01:12:40 → 01:13:25</i></span><span class="cp">▶ VER</span></div>
+            <div class="corte"><span class="n">89</span><span><b>O chat escolheu e deu ruim</b><i>00:34:10 → 00:34:52</i></span><span class="cp">▶ VER</span></div>
+            <div class="corte"><span class="n">85</span><span><b>Teoria: o final do GTA 6</b><i>01:45:03 → 01:45:58</i></span><span class="cp">▶ VER</span></div></div>
+            <p>Assista cada trecho no app. Gostou? Peça o Reel pronto ou corte você mesmo.</p>
+            <div class="acoes2"><a href="#exemplo">Ver outro exemplo</a><a class="pri" href="app.html?criar">Quero meus cortes ↗</a></div></div>
+          <div class="painel-et" data-p="3"><div class="tela"><span class="lb">Legenda do post</span><div class="campo" style="white-space:normal">Ninguém acreditou nessa fuga… 🚔🔥 #gta6 #live #cortes</div><div class="linha"><span>Formato</span><b>Reel em pé 9:16</b></div><div class="linha"><span>Legenda na tela</span><b>Animada</b></div><div class="linha"><span>Onde postar</span><b>Reels · TikTok · Shorts</b></div></div><p>Copie a legenda e poste. Ou receba o Reel já editado por R$ 9,99 no Pix.</p></div>
+        </div>
       </div>
     </div>
   </section>
@@ -206,7 +373,7 @@ footer a{color:var(--score)}
   <section class="s" id="exemplo">
     <div class="wrap">
       <p class="eyebrow">Exemplo de resultado</p>
-      <h2>Live de 2h →<br>4 cortes virais</h2>
+      <h2>Live de 2h →<br>4 cortes <span class="cur">virais</span></h2>
       <div class="ex">
         <div class="clip"><span class="sc">94</span><span class="ct">Fugi da polícia com 1% de vida 😱</span><span class="tm">✂️ 01:12:40 → 01:13:25</span><span class="lg">Ninguém acreditou nessa fuga… 🚔🔥 #gta6 #live</span></div>
         <div class="clip"><span class="sc">89</span><span class="ct">O chat escolheu e deu ruim</span><span class="tm">✂️ 00:34:10 → 00:34:52</span><span class="lg">Nunca mais deixo o chat decidir 😂 #streamer</span></div>
@@ -217,10 +384,33 @@ footer a{color:var(--score)}
     </div>
   </section>
 
+  <section class="s centro">
+    <div class="wrap">
+      <p class="eyebrow">■ CapCut × CorteHype</p>
+      <h2>“Ah, mas eu corto no CapCut <span class="cur">de graça</span>…”</h2>
+      <p class="frase">Dá para fazer, sim. Mas você vai assistir horas de live para achar 1 minuto bom.</p>
+      <p class="intro">Com o CorteHype a IA faz a parte chata. Você ganha <b style="color:var(--ink)">tempo e praticidade</b> e posta mais vezes.</p>
+      <div class="comp">
+        <div class="cx"><div class="cxh"><b>Fazer sozinho</b><small>VOCÊ FAZ TUDO</small></div><ul>
+          <li><span class="x">✕</span>Assiste a live inteira de novo</li>
+          <li><span class="x">✕</span>Chuta qual trecho vai viralizar</li>
+          <li><span class="x">✕</span>Escreve título e legenda do zero</li>
+          <li><span class="x">✕</span>Corta e legenda tudo no CapCut</li>
+          <li><span class="x">✕</span>Horas de trabalho para 1 post</li></ul></div>
+        <div class="cx bom"><div class="cxh"><img src="logo.png" alt="CorteHype"><small>JÁ VEM PRONTO</small></div><ul>
+          <li><span class="v">✓</span>A IA assiste tudo por você</li>
+          <li><span class="v">✓</span>Nota viral de 0 a 100 em cada corte</li>
+          <li><span class="v">✓</span>Título, legenda e hashtags prontos</li>
+          <li><span class="v">✓</span>Reel editado com 1 toque, se quiser</li>
+          <li><span class="v">✓</span>Cortes prontos em cerca de 2 minutos</li></ul></div>
+      </div>
+    </div>
+  </section>
+
   <section class="s">
     <div class="wrap">
       <p class="eyebrow">Para quem é</p>
-      <h2>Feito para quem<br>está começando</h2>
+      <h2>Feito para quem<br>está <span class="cur">começando</span></h2>
       <div class="quem">
         <div><span class="ic">🎮</span><b>Streamers</b><span>Lives longas de GTA, Free Fire, Minecraft e muito mais.</span></div>
         <div><span class="ic">🎙️</span><b>Podcasts</b><span>Os melhores trechos dos episódios para divulgar.</span></div>
@@ -230,27 +420,37 @@ footer a{color:var(--score)}
     </div>
   </section>
 
-  <section class="s">
+  <section class="s centro" id="preco">
     <div class="wrap">
-      <p class="eyebrow">O que você recebe</p>
-      <h2>Tudo pronto para<br>você só postar</h2>
-      <div class="lista">
-        <div><span class="ok">✓</span><span><b>Os melhores momentos</b> do vídeo, escolhidos pela IA</span></div>
-        <div><span class="ok">✓</span><span><b>Nota viral de 0 a 100</b> para saber qual postar primeiro</span></div>
-        <div><span class="ok">✓</span><span><b>Título chamativo</b> para cada corte</span></div>
-        <div><span class="ok">✓</span><span><b>Legenda e hashtags</b> prontas para copiar</span></div>
-        <div><span class="ok">✓</span><span><b>Minuto exato</b> de início e fim de cada corte</span></div>
-        <div><span class="ok">✓</span><span><b>Player no app</b> para assistir cada trecho na hora</span></div>
+      <p class="eyebrow">■ Preço</p>
+      <h2>Analisar é <span class="cur">grátis.</span><br>Para sempre.</h2>
+      <p class="intro">Você só paga se quiser o Reel já editado, e paga só o que usar, no Pix. Sem mensalidade.</p>
+      <div class="precos">
+        <div class="preco"><h3>Grátis</h3><div class="val">R$ 0</div><ul>
+          <li><span class="v">✓</span><span><b>Análise com IA ilimitada:</b> cole quantos links quiser</span></li>
+          <li><span class="v">✓</span><span>Os melhores momentos com <b>nota viral de 0 a 100</b></span></li>
+          <li><span class="v">✓</span><span><b>Título, legenda e hashtags</b> prontos para copiar</span></li>
+          <li><span class="v">✓</span><span>O <b>minuto exato</b> de cada corte e player no app</span></li>
+          <li><span class="v">✓</span><span>Sem cartão, sem pegadinha</span></li></ul>
+          <a class="btn" href="app.html?criar">Criar conta grátis</a></div>
+        <div class="preco dest"><span class="tag">MAIS PEDIDO</span><h3>Reels prontos</h3><div class="val">R$ 9,99 <small>por Reel · Pix</small></div><ul>
+          <li><span class="v">✓</span><span><b>Reel em pé (9:16)</b>, pronto para postar</span></li>
+          <li><span class="v">✓</span><span><b>Legenda animada</b> na tela</span></li>
+          <li><span class="v">✓</span><span>Para <b>Instagram, TikTok e YouTube Shorts</b></span></li>
+          <li><span class="v">✓</span><span>Pronto em 3 a 10 minutos depois do Pix</span></li>
+          <li><span class="v">✓</span><span>Não recebeu? <b>Devolvemos seu dinheiro</b></span></li></ul>
+          <a class="btn primary" href="planos.html">Ver pacotes de Reels ↗</a></div>
       </div>
     </div>
   </section>
 
-  <section class="s">
+  <section class="s" id="duvidas">
     <div class="wrap">
       <p class="eyebrow">Dúvidas</p>
-      <h2>Perguntas<br>frequentes</h2>
+      <h2>Perguntas<br><span class="cur">frequentes</span></h2>
       <div class="faq">
-        <details><summary>É grátis mesmo?</summary><p>Sim. Você cria a conta sem cartão e a IA analisa seus vídeos de graça, quantos você quiser. Sem pegadinha.</p></details>
+        <details><summary>É grátis mesmo?</summary><p>Sim. Você cria a conta sem cartão e a IA analisa seus vídeos de graça, quantos você quiser. Você só paga se quiser o Reel já editado: R$ 9,99 por Reel, no Pix.</p></details>
+        <details><summary>Funciona só com o celular?</summary><p>Sim. O CorteHype funciona no navegador do celular, sem instalar nada. Também dá para usar no computador.</p></details>
         <details><summary>Preciso saber editar vídeo?</summary><p>Não. A IA te entrega os melhores trechos com o minuto exato, título e legenda. Se quiser, dentro do app também dá para pedir os Reels já prontos para postar.</p></details>
         <details><summary>Funciona com live longa?</summary><p>Sim. Lives e podcasts de várias horas funcionam — é justamente onde estão os melhores cortes.</p></details>
         <details><summary>Posso cortar vídeo de qualquer canal?</summary><p>Não. Só vídeos seus ou que o dono autorizou. Antes de cada vídeo o app confere de qual canal ele é, para proteger você e o seu perfil.</p></details>
@@ -295,6 +495,12 @@ footer a{color:var(--score)}
 (function(){const v=document.getElementById('demo'),p=document.getElementById('palco'),bar=document.getElementById('progBar'),bt=document.getElementById('playSom');if(!v)return;
 v.addEventListener('timeupdate',()=>{if(v.duration)bar.style.width=(v.currentTime/v.duration*100)+'%'});
 bt.addEventListener('click',()=>{p.classList.add('tocando');v.controls=true;v.muted=false;v.currentTime=0;v.play().catch(()=>{v.muted=true;v.play()})});})();
+(function(){const g=document.getElementById('gaveta'),ab=document.getElementById('abreMenu');
+function set(o){g.classList.toggle('aberta',o);g.setAttribute('aria-hidden',!o);ab.setAttribute('aria-expanded',o);document.body.style.overflow=o?'hidden':''}
+ab.addEventListener('click',()=>set(true));g.querySelectorAll('[data-fecha]').forEach(e=>e.addEventListener('click',()=>set(false)));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')set(false)});
+const bs=document.querySelectorAll('.etapas button'),ps=document.querySelectorAll('.painel-et');
+bs.forEach(b=>b.addEventListener('click',()=>{const n=+b.dataset.et;bs.forEach((x,i)=>{x.classList.toggle('ativo',i===n);x.classList.toggle('feito',i<n);x.querySelector('i').textContent=i<n?'✓':i+1});ps.forEach(p=>p.classList.toggle('ativo',+p.dataset.p===n))}));})();
 </script>
 </body>
 </html>
