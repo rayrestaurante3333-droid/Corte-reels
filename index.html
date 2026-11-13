@@ -157,7 +157,7 @@ footer a{color:var(--score)}
         <div class="mini top"><span class="n">94</span><b>Fugi da polícia com 1% de vida 😱</b><span>01:12:40 → 01:13:25</span></div>
         <div class="mini"><span class="n">89</span><b>O chat escolheu e deu ruim</b><span>00:34:10 → 00:34:52</span></div>
         <div class="mini"><span class="n">85</span><b>Teoria: o final do GTA 6</b><span>01:45:03 → 01:45:58</span></div>
-        <a class="bt" href="app.html?criar">Ver meus cortes</a>
+        <a class="bt" href="#video">▶ Ver meus cortes</a>
       </div>
     </div>
   </section>
@@ -167,10 +167,11 @@ footer a{color:var(--score)}
       <div>
         <p class="eyebrow">● Veja antes de criar sua conta</p>
         <h2>Como funciona<br>em 20 segundos</h2>
+        <p class="intro" style="margin-top:8px">🔊 Toque no vídeo para ouvir com som.</p>
         <p class="intro">Você cola o link do YouTube, a IA encontra os momentos virais e você recebe os cortes prontos para postar no Reels, TikTok e Shorts.</p>
         <div class="ctas"><a class="btn primary" href="app.html?criar">Começar grátis</a></div>
       </div>
-      <video src="videos/como-funciona.mp4" poster="videos/como-funciona.jpg" controls playsinline muted autoplay loop preload="metadata" aria-label="Vídeo mostrando como o CorteHype funciona"></video>
+      <video id="demo" src="videos/reel-narrado.mp4" poster="videos/reel-narrado.jpg" controls playsinline muted autoplay loop preload="metadata" aria-label="Vídeo mostrando como o CorteHype funciona"></video>
     </div>
   </section>
 
@@ -287,6 +288,9 @@ footer a{color:var(--score)}
     ad_widget_description: 'Tire suas dúvidas sobre os cortes com IA',
     ad_popup_messages: ['👋 Quer transformar seu vídeo em reels virais? Me pergunte!']
   });
+</script>
+<script>
+document.querySelectorAll('a[href="#video"]').forEach(a=>a.addEventListener('click',()=>{const v=document.getElementById('demo');if(!v)return;v.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>{v.muted=false;v.currentTime=0;v.play().catch(()=>{v.muted=true;v.play()})},400)}));
 </script>
 </body>
 </html>
