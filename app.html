@@ -252,7 +252,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
 (function () {
   var URL_SB = 'https://tredxfypgqswjmvpemkt.supabase.co';
   var KEY = 'sb_publishable_25C6-sCAB4A-Hotczu6T4g_T5FjsTJW';
-  var LIMITE = { gratis: 1, criador: 2, agencia: 4, admin: 100000 };
+  var LIMITE_DIA = 10; // análise grátis ilimitada; só uso justo de 10 links por dia
   var sb = supabase.createClient(URL_SB, KEY);
   var $ = function (id) { return document.getElementById(id); };
   var user = null, perfil = null, modo = 'entrar', canal = null;
@@ -342,19 +342,18 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       .subscribe();
   }
 
-  var MSG_LIMITE = 'O plano Grátis permite apenas 1 vídeo. Toque em "Ver planos" para enviar mais.';
+  var MSG_LIMITE = 'Você já analisou 10 links hoje 🔥 Amanhã libera de novo. Enquanto isso, peça os Reels prontos dos vídeos já analisados.';
   async function videosUsados() {
-    var q = sb.from('videos').select('id', { count: 'exact', head: true }).or('status.eq.pronto,and(excluido_em.is.null,status.neq.erro)');
-    if (perfil.plano !== 'gratis') { var ini = new Date(); ini.setDate(1); ini.setHours(0, 0, 0, 0); q = q.gte('criado_em', ini.toISOString()); }
-    var r = await q;
+    var ini = new Date(); ini.setHours(0, 0, 0, 0);
+    var r = await sb.from('videos').select('id', { count: 'exact', head: true }).neq('status', 'erro').gte('criado_em', ini.toISOString());
     return r.count || 0;
   }
   async function podeEnviar() {
-    var lim = LIMITE[perfil.plano] || 1, usados = await videosUsados();
-    if (usados >= lim) { msg($('up-msg'), perfil.plano === 'gratis' || !perfil.plano ? MSG_LIMITE : 'Você já usou os ' + lim + ' links do seu plano este mês. Faça upgrade para enviar mais.', 'err'); return false; }
+    if (perfil.plano === 'admin') return true;
+    if ((await videosUsados()) >= LIMITE_DIA) { msg($('up-msg'), MSG_LIMITE, 'err'); return false; }
     return true;
   }
-  function erroInsert(e, padrao) { return /LIMITE_PLANO/.test(e.message || '') ? (perfil.plano === 'gratis' ? MSG_LIMITE : 'Você já usou os links do seu plano este mês. Faça upgrade para enviar mais.') : padrao; }
+  function erroInsert(e, padrao) { return /LIMITE_PLANO/.test(e.message || '') ? MSG_LIMITE : padrao; }
 
   var STATUS = { enviado: ['Aguardando', 'proc'], transcrevendo: ['Analisando', 'proc'], analisando: ['IA analisando', 'proc'], pronto: ['Pronto', 'pronto'], erro: ['Erro', 'erro'] };
   function fmt(s) { s = Math.max(0, Math.round(s || 0)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
@@ -658,7 +657,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
       montar(reels, '🎬 Seus Reels prontos para postar', true);
       var del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.textContent = 'Excluir vídeo';
       del.onclick = async function () {
-        var aviso = perfil.plano === 'gratis' ? '\n\nAtenção: no plano Grátis, excluir um vídeo já analisado não libera um novo envio.' : '';
+        var aviso = '';
         if (!confirm('Excluir este vídeo da sua lista?' + aviso)) return;
         del.disabled = true;
         var x = await sb.from('videos').update({ excluido_em: new Date().toISOString() }).eq('id', v.id);
