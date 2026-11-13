@@ -89,12 +89,24 @@
   </div>
 
   <div class="help">
+    Conhece alguém que faz live ou vídeo?<br>
+    <a class="btn sm" href="#" data-share>📲 Mandar para um amigo</a>
+  </div>
+
+  <div class="help">
     Ficou com dúvida? Entre no nosso canal no Telegram:<br>
     <a class="btn sm ghost" href="https://t.me/cortehypeoficial">💬 Clique aqui: t.me/cortehypeoficial</a>
   </div>
 
   <footer>© 2026 CorteHype · t.me/cortehypeoficial</footer>
 </div>
+<script>
+// Botão "Mandar para um amigo": abre a tela de compartilhar do celular; sem ela, abre o WhatsApp
+document.querySelectorAll('[data-share]').forEach(b=>b.addEventListener('click',async e=>{e.preventDefault();
+const url='https://cortehype.com.br/convite.html',txt='Olha essa ferramenta que corta seus vídeos sozinha ✂️ A IA acha os momentos virais da sua live. É grátis:';
+if(navigator.share){try{await navigator.share({title:'CorteHype',text:txt,url});return}catch(err){if(err.name==='AbortError')return}}
+location.href='https://wa.me/?text='+encodeURIComponent(txt+' '+url)}));
+</script>
 <!-- Chat MyChatBot (atendimento CorteHype) -->
 <link rel="stylesheet" href="https://storage.googleapis.com/mychatbot-widget-assets/v1/style.css" />
 <script src="https://storage.googleapis.com/mychatbot-widget-assets/v1/widget.js"></script>
