@@ -19,7 +19,7 @@
 <meta name="theme-color" content="#09090b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Albert+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Albert+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500;700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#09090b;--panel:#131316;--line:#24242b;--ink:#fafafa;--muted:#a1a1aa;--rec:#ff2d3f;--score:#ff8a1f;--ok:#22c55e;--grad:linear-gradient(90deg,#ff2d3f,#ff7a1a);
 --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;--body:"Albert Sans","Segoe UI",Roboto,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;color-scheme:dark}
@@ -116,6 +116,26 @@ details p{margin-top:8px;color:var(--muted);font-size:15px}
 footer{border-top:1px solid var(--line);padding:26px 0 40px;font-size:13px;color:var(--muted);text-align:center}
 footer a{color:var(--score)}
 
+/* hero novo: título central + vídeo grande */
+.hero2{padding:40px 0 56px;position:relative;overflow:hidden;text-align:center}
+.hero2::before{content:"";position:absolute;left:50%;top:-180px;transform:translateX(-50%);width:760px;height:620px;background:radial-gradient(circle,rgba(255,45,63,.24),transparent 62%);pointer-events:none}
+.hero2 .wrap{position:relative;z-index:1;display:grid;justify-items:center}
+.hero2 h1{font-size:clamp(50px,12.5vw,92px);max-width:900px}
+.hero2 h1 .cur{font-family:"Instrument Serif",Georgia,serif;font-style:italic;text-transform:none;font-weight:400;letter-spacing:0;font-size:1.12em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;padding:0 .06em}
+.hero2 .sub{font-size:18px;color:var(--muted);max-width:560px;margin-top:22px}
+.hero2 .ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;justify-content:center}
+.hero2 .selos{justify-content:center}
+.palco{position:relative;width:100%;max-width:360px;margin-top:30px;border-radius:30px;overflow:hidden;border:1px solid var(--line);background:#000;box-shadow:0 40px 90px -30px rgba(255,45,63,.45),0 0 0 6px #1d1a24}
+.palco video{display:block;width:100%;aspect-ratio:9/16;object-fit:cover;background:#000}
+.palco .play{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:14px;background:linear-gradient(180deg,rgba(9,9,11,.15),rgba(9,9,11,.55));border:0;color:#fff;cursor:pointer;font:700 22px/1.1 var(--body)}
+.palco .play i{width:84px;height:84px;border-radius:50%;background:var(--grad);display:grid;place-items:center;box-shadow:0 0 0 10px rgba(255,45,63,.18),0 14px 40px -8px rgba(255,45,63,.7);animation:pulsa 2s ease-in-out infinite}
+.palco .play i::after{content:"";margin-left:6px;border-left:24px solid #fff;border-top:15px solid transparent;border-bottom:15px solid transparent}
+@keyframes pulsa{50%{box-shadow:0 0 0 18px rgba(255,45,63,.06),0 14px 40px -8px rgba(255,45,63,.7)}}
+.palco .som{font:500 12px var(--mono);color:#e4e4e7;letter-spacing:.06em}
+.palco .prog{position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(255,255,255,.12)}
+.palco .prog b{display:block;height:100%;width:0;background:var(--grad)}
+.palco.tocando .play{display:none}
+
 /* vídeo demonstração */
 .demo{display:grid;gap:22px;align-items:center}
 @media (min-width:860px){.demo{grid-template-columns:1fr 1fr}}
@@ -135,43 +155,25 @@ footer a{color:var(--score)}
 </header>
 
 <main>
-  <section class="hero">
-    <div class="wrap grid">
-      <div>
-        <p class="eyebrow">● REC · da live ao Reel</p>
-        <h1>Sua live vira <em>Reels virais.</em> <span class="z">0800.</span></h1>
-        <p class="sub">Cole o link da sua live ou vídeo do YouTube. Em 2 minutos a IA assiste tudo e mostra os momentos com mais chance de bombar — com nota viral, título e legenda prontos para postar.</p>
-        <div class="ctas">
-          <a class="btn primary" href="app.html?criar">Começar grátis</a>
-          <a class="btn" href="#video">▶ Ver como funciona</a>
-        </div>
-        <div class="selos" aria-label="Vantagens">
-          <span class="selo"><b>✓</b> Sem cartão</span>
-          <span class="selo"><b>✓</b> 100% em português</span>
-          <span class="selo"><b>✓</b> Feito para iniciantes</span>
-        </div>
+  <section class="hero2" id="video">
+    <div class="wrap">
+      <p class="eyebrow">● REC · da live ao Reel</p>
+      <h1 style="margin-top:12px">Sua live vira cortes que <span class="cur">viralizam.</span></h1>
+      <div class="palco" id="palco">
+        <video id="demo" src="videos/reel-narrado.mp4" poster="videos/reel-narrado.jpg" playsinline muted autoplay loop preload="metadata" aria-label="Vídeo mostrando como o CorteHype funciona"></video>
+        <button class="play" id="playSom" type="button" aria-label="Assistir o vídeo com som"><i></i>Assistir com som<span class="som">🔊 20 SEGUNDOS</span></button>
+        <div class="prog" aria-hidden="true"><b id="progBar"></b></div>
       </div>
-      <div class="fone">
-        <div class="barra"><span class="rec"><i></i> IA analisando</span><span>live_gta6.mp4 · 2h</span></div>
-        <p class="titulo">🔥 Melhores momentos encontrados</p>
-        <div class="mini top"><span class="n">94</span><b>Fugi da polícia com 1% de vida 😱</b><span>01:12:40 → 01:13:25</span></div>
-        <div class="mini"><span class="n">89</span><b>O chat escolheu e deu ruim</b><span>00:34:10 → 00:34:52</span></div>
-        <div class="mini"><span class="n">85</span><b>Teoria: o final do GTA 6</b><span>01:45:03 → 01:45:58</span></div>
-        <a class="bt" href="#video">▶ Ver meus cortes</a>
+      <p class="sub">O CorteHype é uma IA que assiste sua live ou vídeo do YouTube e entrega os momentos com mais chance de bombar — com nota viral, título e legenda prontos para postar.</p>
+      <div class="ctas">
+        <a class="btn primary" href="app.html?criar">Começar grátis</a>
+        <a class="btn" href="#como">Como funciona</a>
       </div>
-    </div>
-  </section>
-
-  <section class="s" id="video">
-    <div class="wrap demo">
-      <div>
-        <p class="eyebrow">● Veja antes de criar sua conta</p>
-        <h2>Como funciona<br>em 20 segundos</h2>
-        <p class="intro" style="margin-top:8px">🔊 Toque no vídeo para ouvir com som.</p>
-        <p class="intro">Você cola o link do YouTube, a IA encontra os momentos virais e você recebe os cortes prontos para postar no Reels, TikTok e Shorts.</p>
-        <div class="ctas"><a class="btn primary" href="app.html?criar">Começar grátis</a></div>
+      <div class="selos" aria-label="Vantagens">
+        <span class="selo"><b>✓</b> Sem cartão</span>
+        <span class="selo"><b>✓</b> 100% em português</span>
+        <span class="selo"><b>✓</b> Feito para iniciantes</span>
       </div>
-      <video id="demo" src="videos/reel-narrado.mp4" poster="videos/reel-narrado.jpg" controls playsinline muted autoplay loop preload="metadata" aria-label="Vídeo mostrando como o CorteHype funciona"></video>
     </div>
   </section>
 
@@ -290,7 +292,9 @@ footer a{color:var(--score)}
   });
 </script>
 <script>
-document.querySelectorAll('a[href="#video"]').forEach(a=>a.addEventListener('click',()=>{const v=document.getElementById('demo');if(!v)return;v.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>{v.muted=false;v.currentTime=0;v.play().catch(()=>{v.muted=true;v.play()})},400)}));
+(function(){const v=document.getElementById('demo'),p=document.getElementById('palco'),bar=document.getElementById('progBar'),bt=document.getElementById('playSom');if(!v)return;
+v.addEventListener('timeupdate',()=>{if(v.duration)bar.style.width=(v.currentTime/v.duration*100)+'%'});
+bt.addEventListener('click',()=>{p.classList.add('tocando');v.controls=true;v.muted=false;v.currentTime=0;v.play().catch(()=>{v.muted=true;v.play()})});})();
 </script>
 </body>
 </html>
