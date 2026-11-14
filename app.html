@@ -156,7 +156,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     <div class="plan">
       <div>
         <p class="muted" style="font-size:14px">Olá, <span id="u-nome"></span></p>
-        <p style="font-weight:700">Seu plano: <span class="badge" id="u-plano">Grátis</span></p>
+        <p style="font-weight:700">CorteHype <span class="badge" id="u-plano">100% grátis</span></p>
       </div>
       <a class="btn small" id="u-upgrade" href="https://t.me/cortehypeoficial" target="_blank" rel="noopener">✈️ Telegram</a>
     </div>
@@ -328,7 +328,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
     perfil = p.data || { plano: 'gratis', nome: '' };
     $('u-nome').textContent = perfil.nome ? perfil.nome.toLowerCase().replace(/(^|\s)(\S)/g, function (m, a, b) { return a + b.toUpperCase(); }).replace(/ (De|Da|Do|Dos|Das|E) /g, function (m) { return m.toLowerCase(); }) : user.email;
     var nomes = { gratis: 'Grátis', criador: 'Criador', agencia: 'Pro', admin: 'Admin' };
-    $('u-plano').textContent = nomes[perfil.plano] || 'Grátis';
+    $('u-plano').textContent = perfil.plano === 'admin' ? (nomes[perfil.plano] || 'Admin') : '100% grátis';
     $('u-plano').className = 'badge ' + perfil.plano;
     
     $('admin').classList.toggle('hidden', perfil.plano !== 'admin');
