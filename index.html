@@ -326,9 +326,14 @@ footer a{color:var(--score)}
 @media (min-width:860px){.demo{grid-template-columns:1fr 1fr}}
 .demo video{justify-self:center;width:100%;max-width:330px;aspect-ratio:9/16;border-radius:28px;border:1px solid var(--line);background:#000;box-shadow:0 30px 80px -30px rgba(0,0,0,.8),0 0 0 6px #1d1a24;display:block}
 .demo .ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.faixa-gratis{background:var(--grad);color:#fff;text-align:center;font:700 13px var(--mono);letter-spacing:.08em;padding:9px 12px}
+.aula{display:grid;gap:12px;margin-top:24px;text-align:left;counter-reset:a}
+.aula li{list-style:none;border:1px solid var(--line);border-radius:16px;padding:16px 16px 16px 58px;background:var(--panel);position:relative;font-size:15px}
+.aula li::before{counter-increment:a;content:counter(a);position:absolute;left:16px;top:14px;width:28px;height:28px;border-radius:8px;background:var(--grad);color:#fff;display:grid;place-items:center;font:700 13px var(--mono)}
 </style>
 </head>
 <body>
+<div class="faixa-gratis">🔥 GRÁTIS POR TEMPO LIMITADO · SEM CARTÃO · SEM PIX</div>
 <header class="nav">
   <div class="wrap">
     <a href="./" aria-label="CorteHype, início"><img src="logo.png" alt="CorteHype"></a>
@@ -346,7 +351,8 @@ footer a{color:var(--score)}
     <div class="topo"><img src="logo.png" alt="CorteHype"><button class="menu-bt" data-fecha type="button" aria-label="Fechar menu">✕</button></div>
     <a class="item" href="#como" data-fecha>Como funciona</a>
     <a class="item" href="#app" data-fecha>O app</a>
-    <a class="item" href="#preco" data-fecha>Preço</a>
+    <a class="item" href="#preco" data-fecha>Grátis</a>
+    <a class="item" href="#aprenda" data-fecha>Aprenda a viralizar</a>
     <a class="item" href="#duvidas" data-fecha>Dúvidas</a>
     <a class="item" href="app.html" data-fecha>Entrar</a>
     <a class="btn primary" href="app.html?criar">Quero o CorteHype ↗</a>
@@ -364,7 +370,7 @@ footer a{color:var(--score)}
         <button class="play" id="playSom" type="button" aria-label="Assistir o vídeo com som"><i></i>Assistir com som<span class="som">🔊 20 SEGUNDOS</span></button>
         <div class="prog" aria-hidden="true"><b id="progBar"></b></div>
       </div>
-      <p class="sub">Você cola o link de um vídeo do YouTube. A IA assiste tudo e entrega os momentos com mais chance de bombar, com nota viral, título e legenda. Pegue grátis, sem edição, ou com edição, já pronto para postar.</p>
+      <p class="sub">Você cola o link de um vídeo do YouTube. A IA assiste tudo e entrega os momentos com mais chance de bombar, com nota viral, título e legenda. Tudo grátis: cortes, legendas e hashtags.</p>
       <div class="ctas">
         <a class="btn primary" href="app.html?criar">Começar grátis</a>
         <a class="btn" href="#como">Como funciona</a>
@@ -432,11 +438,10 @@ footer a{color:var(--score)}
         <div class="tela"><span class="lb">● IA analisando</span><div class="linha"><span>live_gta6 · 2h14</span><b>72%</b></div><div class="barra2"><b></b></div><div class="linha"><span>Momentos encontrados</span><b>4 cortes 🔥</b></div><div class="linha"><span>Tempo</span><b>≈ 2 min</b></div></div>
       </div>
       <div class="passo2">
-        <div><p class="k2">PASSO 04</p><h3>Veja e escolha seus vídeos</h3><p>Assista cada corte e escolha os que você mais gostar. Você pode pegar <b style="color:var(--ink)">sem edição</b>, de graça, ou <b style="color:var(--ink)">com edição</b>: o Reel já pronto, com legenda na tela.</p></div>
+        <div><p class="k2">PASSO 04</p><h3>Veja e escolha seus vídeos</h3><p>Assista cada corte e escolha os que você mais gostar. Tudo de graça: minuto exato, título, legenda e hashtags.</p></div>
         <div class="tela"><span class="lb">Seus cortes · do melhor ao pior</span>
           <div class="corte top"><span class="n">94</span><span><b>Fugi da polícia com 1% de vida 😱</b><i>01:12:40 → 01:13:25</i></span><span class="cp">▶ VER</span></div>
-          <div class="linha"><span>Sem edição</span><b>Grátis</b></div>
-          <div class="linha"><span>Com edição (Reel pronto)</span><b>R$ 9,99</b></div>
+          <div class="linha"><span>Corte + legenda + hashtags</span><b>Grátis</b></div>
         </div>
       </div>
       <div class="passo2">
@@ -474,9 +479,9 @@ footer a{color:var(--score)}
             <div class="corte top"><span class="n">94</span><span><b>Fugi da polícia com 1% de vida 😱</b><i>01:12:40 → 01:13:25</i></span><span class="cp">▶ VER</span></div>
             <div class="corte"><span class="n">89</span><span><b>O chat escolheu e deu ruim</b><i>00:34:10 → 00:34:52</i></span><span class="cp">▶ VER</span></div>
             <div class="corte"><span class="n">85</span><span><b>Teoria: o final do GTA 6</b><i>01:45:03 → 01:45:58</i></span><span class="cp">▶ VER</span></div></div>
-            <p>Assista cada trecho no app. Gostou? Peça o Reel pronto ou corte você mesmo.</p>
+            <p>Assista cada trecho no app. Gostou? Corte você mesmo, de graça.</p>
             <div class="acoes2"><a href="#exemplo">Ver outro exemplo</a><a class="pri" href="app.html?criar">Quero meus cortes ↗</a></div></div>
-          <div class="painel-et" data-p="3"><div class="tela"><span class="lb">Legenda do post</span><div class="campo" style="white-space:normal">Ninguém acreditou nessa fuga… 🚔🔥 #gta6 #live #cortes</div><div class="linha"><span>Formato</span><b>Reel em pé 9:16</b></div><div class="linha"><span>Legenda na tela</span><b>Animada</b></div><div class="linha"><span>Onde postar</span><b>Reels · TikTok · Shorts</b></div></div><p>Copie a legenda e poste. Ou receba o Reel já editado por R$ 9,99 no Pix.</p></div>
+          <div class="painel-et" data-p="3"><div class="tela"><span class="lb">Legenda do post</span><div class="campo" style="white-space:normal">Ninguém acreditou nessa fuga… 🚔🔥 #gta6 #live #cortes</div><div class="linha"><span>Formato</span><b>Reel em pé 9:16</b></div><div class="linha"><span>Legenda na tela</span><b>Animada</b></div><div class="linha"><span>Onde postar</span><b>Reels · TikTok · Shorts</b></div></div><p>Copie a legenda grátis e poste.</p></div>
         </div>
       </div>
     </div>
@@ -551,25 +556,38 @@ footer a{color:var(--score)}
 
   <section class="s centro" id="preco">
     <div class="wrap">
-      <p class="eyebrow">■ Preço</p>
-      <h2>Analisar é <span class="cur">grátis.</span><br>Para sempre.</h2>
-      <p class="intro">Você só paga se quiser o Reel já editado, e paga só o que usar, no Pix. Sem mensalidade.</p>
-      <div class="precos">
-        <div class="preco"><h3>Grátis</h3><div class="val">R$ 0</div><ul>
+      <p class="eyebrow">■ Grátis por tempo limitado</p>
+      <h2>Tudo <span class="cur">grátis.</span><br>Sem pegadinha.</h2>
+      <p class="intro">Sem mensalidade, sem cartão e sem Pix. Aproveite enquanto está liberado.</p>
+      <div class="precos" style="grid-template-columns:1fr;max-width:520px;margin-left:auto;margin-right:auto">
+        <div class="preco dest"><span class="tag">0800</span><h3>Grátis</h3><div class="val">R$ 0</div><ul>
           <li><span class="v">✓</span><span><b>Análise com IA ilimitada:</b> cole quantos links quiser</span></li>
           <li><span class="v">✓</span><span>Os melhores momentos com <b>nota viral de 0 a 100</b></span></li>
-          <li><span class="v">✓</span><span><b>Título, legenda e hashtags</b> prontos para copiar</span></li>
+          <li><span class="v">✓</span><span><b>Todas as legendas, títulos e hashtags</b> grátis para copiar</span></li>
           <li><span class="v">✓</span><span>O <b>minuto exato</b> de cada corte e player no app</span></li>
-          <li><span class="v">✓</span><span>Sem cartão, sem pegadinha</span></li></ul>
-          <a class="btn" href="app.html?criar">Criar conta grátis</a></div>
-        <div class="preco dest"><span class="tag">MAIS PEDIDO</span><h3>Reels prontos</h3><div class="val">R$ 9,99 <small>por Reel · Pix</small></div><ul>
-          <li><span class="v">✓</span><span><b>Reel em pé (9:16)</b>, pronto para postar</span></li>
-          <li><span class="v">✓</span><span><b>Legenda animada</b> na tela</span></li>
-          <li><span class="v">✓</span><span>Para <b>Instagram, TikTok e YouTube Shorts</b></span></li>
-          <li><span class="v">✓</span><span>Pronto em 3 a 10 minutos depois do Pix</span></li>
-          <li><span class="v">✓</span><span>Não recebeu? <b>Devolvemos seu dinheiro</b></span></li></ul>
-          <a class="btn primary" href="planos.html">Ver pacotes de Reels ↗</a></div>
+          <li><span class="v">✓</span><span><b>Aula grátis</b> de como editar e viralizar</span></li></ul>
+          <a class="btn primary" href="app.html?criar">Criar conta grátis</a></div>
       </div>
+    </div>
+  </section>
+
+  <section class="s" id="aprenda">
+    <div class="wrap">
+      <p class="eyebrow">Aula grátis</p>
+      <h2>Aprenda a editar e<br><span class="cur">viralizar</span> no Instagram</h2>
+      <p class="intro">Você não precisa de app pago. Com o corte do CorteHype e o editor do próprio Instagram, você faz tudo pelo celular.</p>
+      <ol class="aula" style="padding:0">
+        <li><b>Pegue o vídeo:</b> se o vídeo é seu, baixe pelo YouTube Studio (no navegador, em "Versão para computador": Conteúdo › ⋮ › Baixar). Ou use o arquivo original da galeria.</li>
+        <li><b>Abra o editor:</b> no Instagram, toque em <b>+</b> › <b>Reels</b> e escolha o vídeo na galeria.</li>
+        <li><b>Corte no minuto certo:</b> toque em <b>Editar</b> › no clipe. Arraste as bordas até o minuto que o CorteHype mostrou. Use <b>Dividir</b> para tirar partes do meio.</li>
+        <li><b>Gancho nos 3 primeiros segundos:</b> comece no momento mais forte e escreva o título do CorteHype na tela (<b>Aa</b>).</li>
+        <li><b>Legenda na tela:</b> figurinhas › <b>Legendas</b>. A maioria assiste sem som.</li>
+        <li><b>Ritmo:</b> deixe entre 15 e 45 segundos. Em <b>Velocidade</b>, 1.1x ou 1.2x deixa mais dinâmico.</li>
+        <li><b>Música em alta:</b> em <b>Áudio</b>, escolha uma música em alta e abaixe o volume para a fala aparecer.</li>
+        <li><b>Publique:</b> cole a legenda e as hashtags do CorteHype, escolha uma capa chamativa e poste também no TikTok e no Shorts.</li>
+        <li><b>Constância:</b> poste 1 a 3 cortes por dia. Viralizar é teste: quanto mais cortes, mais chances.</li>
+      </ol>
+      <p class="muted" style="margin-top:16px">Quer uma edição mais completa? O app <b>Edits</b>, do próprio Instagram, também é grátis.</p>
     </div>
   </section>
 
@@ -578,12 +596,12 @@ footer a{color:var(--score)}
       <p class="eyebrow">Dúvidas</p>
       <h2>Perguntas<br><span class="cur">frequentes</span></h2>
       <div class="faq">
-        <details><summary>É grátis mesmo?</summary><p>Sim. Você cria a conta sem cartão e a IA analisa seus vídeos de graça, quantos você quiser. Você só paga se quiser o Reel já editado: R$ 9,99 por Reel, no Pix.</p></details>
+        <details><summary>É grátis mesmo?</summary><p>Sim. Você cria a conta sem cartão e a IA analisa seus vídeos de graça, quantos você quiser. Por tempo limitado, tudo é grátis: análise, cortes, legendas e hashtags.</p></details>
         <details><summary>Funciona só com o celular?</summary><p>Sim. O CorteHype funciona no navegador do celular, sem instalar nada. Também dá para usar no computador.</p></details>
-        <details><summary>Quanto tempo demora?</summary><p>A IA leva de 1 a 3 minutos para achar os cortes. Se você pedir o Reel com edição, ele fica pronto de 3 a 10 minutos depois do Pix.</p></details>
-        <details><summary>Qual a diferença entre com e sem edição?</summary><p><b>Sem edição (grátis):</b> você recebe o minuto exato de cada corte, com título, legenda e hashtags, e corta no app que preferir. <b>Com edição (R$ 9,99 por Reel):</b> você recebe o Reel em pé, já cortado e com legenda animada na tela, pronto para postar.</p></details>
+        <details><summary>Quanto tempo demora?</summary><p>A IA leva de 1 a 3 minutos para achar os cortes.</p></details>
+        <details><summary>Como eu faço o corte?</summary><p>Você recebe o minuto exato de cada corte, com título, legenda e hashtags, e corta grátis no editor do Instagram. Veja a <a href="#aprenda" style="color:var(--score)">aula grátis</a> logo acima.</p></details>
         <details><summary>Onde eu posto os cortes?</summary><p>Onde você preferir: Instagram Reels, TikTok e YouTube Shorts. É só baixar e postar.</p></details>
-        <details><summary>Preciso saber editar vídeo?</summary><p>Não. A IA te entrega os melhores trechos com o minuto exato, título e legenda. Se quiser, dentro do app também dá para pedir os Reels já prontos para postar.</p></details>
+        <details><summary>Preciso saber editar vídeo?</summary><p>Não. A IA te entrega os melhores trechos com o minuto exato, título e legenda. E aqui no site tem uma aula grátis de como editar no Instagram.</p></details>
         <details><summary>Funciona com live longa?</summary><p>Sim. Lives e podcasts de várias horas funcionam — é justamente onde estão os melhores cortes.</p></details>
         <details><summary>Posso cortar vídeo de qualquer canal?</summary><p>Não. Só vídeos seus ou que o dono autorizou. Antes de cada vídeo o app confere de qual canal ele é, para proteger você e o seu perfil.</p></details>
         <details><summary>O vídeo precisa estar no YouTube?</summary><p>Sim, o vídeo precisa estar público ou não listado no YouTube. Vídeos privados a IA não consegue assistir.</p></details>
