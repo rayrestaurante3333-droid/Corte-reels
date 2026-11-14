@@ -158,7 +158,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         <p class="muted" style="font-size:14px">Olá, <span id="u-nome"></span></p>
         <p style="font-weight:700">CorteHype <span class="badge" id="u-plano">100% grátis</span></p>
       </div>
-      <a class="btn small" id="u-upgrade" href="https://t.me/cortehypeoficial" target="_blank" rel="noopener">✈️ Telegram</a>
+      <a class="btn small" id="u-upgrade" href="index.html#aprenda">🎓 Aula grátis</a>
     </div>
 
     <section>
@@ -242,7 +242,7 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
         <p class="muted" style="margin:0;font-size:13px">Pagou e não liberou? <a href="mailto:cortehype.appsuporte@gmail.com?subject=Suporte%20CorteHype%20-%20Pagamento" style="color:var(--score)">Fale com o suporte</a></p>
       </div>
     </div>
-    <footer>💚 0800: a IA assiste seu vídeo e mostra os melhores momentos — com nota viral, título e legenda — para você cortar. Está começando agora? Esse empurrão é por nossa conta. <b>Grátis por tempo limitado.</b> Dicas grátis no <a href="https://t.me/cortehypeoficial" target="_blank" rel="noopener" style="color:var(--score)">Telegram</a>. Aprenda a editar no Instagram: <a href="index.html#aprenda" style="color:var(--score)">aula grátis</a>.<br>Suporte: <a href="mailto:cortehype.appsuporte@gmail.com" style="color:var(--score)">cortehype.appsuporte@gmail.com</a></footer>
+    <footer>💚 0800: a IA assiste seu vídeo e mostra os melhores momentos — com nota viral, título e legenda — para você cortar. Está começando agora? Esse empurrão é por nossa conta. <b>Grátis por tempo limitado.</b> Aprenda a editar no Instagram: <a href="index.html#aprenda" style="color:var(--score)">aula grátis</a>.<br>Suporte: <a href="mailto:cortehype.appsuporte@gmail.com" style="color:var(--score)">cortehype.appsuporte@gmail.com</a></footer>
   </main>
 </div>
 
@@ -644,10 +644,9 @@ footer{margin-top:40px;color:var(--muted);font-size:13px}
           var ec = document.createElement('p'); ec.className = 'aviso'; ec.textContent = '⏳ Recebemos seu aviso de Pix. Estamos conferindo — assim que confirmar, seus Reels começam a ser feitos.'; box.appendChild(ec);
         } else if (!ks) {
           var oferta = document.createElement('div'); oferta.className = 'oferta';
-          oferta.innerHTML = '<b>🎓 Aprenda a cortar grátis</b><span>Use os minutos acima no editor do Instagram. Dicas grátis todo dia no nosso Telegram.</span>';
-          var bt = document.createElement('a'); bt.className = 'btn primary small'; bt.textContent = '✈️ Entrar no Telegram'; bt.href = 'https://t.me/cortehypeoficial'; bt.target = '_blank'; bt.rel = 'noopener';
-          var b2 = document.createElement('a'); b2.className = 'btn small'; b2.textContent = 'Ver aula grátis'; b2.href = 'index.html#aprenda';
-          oferta.appendChild(bt); oferta.appendChild(b2); box.appendChild(oferta);
+          oferta.innerHTML = '<b>🎓 Aprenda a cortar grátis</b><span>Use os minutos acima no editor do Instagram.</span>';
+          var b2 = document.createElement('a'); b2.className = 'btn primary small'; b2.textContent = 'Ver aula grátis'; b2.href = 'index.html#aprenda';
+          oferta.appendChild(b2); box.appendChild(oferta);
         } else if (ks === 'erro') {
           var e2 = document.createElement('p'); e2.className = 'aviso err'; e2.textContent = 'Não conseguimos gerar os Reels deste vídeo. Escreva para cortehype.appsuporte@gmail.com para receber seu dinheiro de volta.'; box.appendChild(e2);
         } else if (ks !== 'pronto') {
